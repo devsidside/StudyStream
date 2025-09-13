@@ -153,6 +153,12 @@ export const queryClient = new QueryClient({
       
       // Refetch interval for real-time data (disabled by default)
       refetchInterval: false,
+      
+      // Enable error boundaries for API errors
+      throwOnError: (error: any) => {
+        // Throw to error boundary for server errors and network errors
+        return !error?.status || error.status >= 500;
+      },
     },
     mutations: {
       // Retry mutations with exponential backoff
@@ -161,6 +167,12 @@ export const queryClient = new QueryClient({
       
       // Network mode for mutations
       networkMode: 'online',
+      
+      // Enable error boundaries for critical mutation errors
+      throwOnError: (error: any) => {
+        // Throw to error boundary for server errors and network errors
+        return !error?.status || error.status >= 500;
+      },
     },
   },
 });

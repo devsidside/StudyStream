@@ -4,6 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/contexts/auth-context";
+import { ErrorProvider, useErrorReporting } from "@/contexts/error-context";
+import { ErrorBoundary } from "@/components/error-boundaries";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -64,16 +66,50 @@ function Router() {
   );
 }
 
+function AppWithErrorHandling() {
+  const { reportError } = useErrorReporting();
+  
+  return (
+    <ErrorBoundary 
+      level="critical" 
+      showDetails={import.meta.env.MODE === 'development'}
+      onError={(error, errorInfo) => {
+        reportError(error, {
+          type: 'error',
+          source: 'client',
+          details: { componentStack: errorInfo.componentStack },
+          showToast: false // Critical errors have their own UI
+        });
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ErrorBoundary 
+            level="page"
+            onError={(error, errorInfo) => {
+              reportError(error, {
+                type: 'error',
+                source: 'client',
+                details: { componentStack: errorInfo.componentStack }
+              });
+            }}
+          >
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </ErrorBoundary>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+}
+
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorProvider>
+      <AppWithErrorHandling />
+    </ErrorProvider>
   );
 }
 

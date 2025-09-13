@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { QueryErrorBoundary } from "@/components/error-boundaries";
 import NoteCard from "@/components/notes/note-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +29,8 @@ export default function NotesHub() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Header */}
+      <QueryErrorBoundary queryKeys={['/api/analytics/trending', '/api/analytics/top-notes', '/api/analytics/recent', '/api/analytics/subjects']}>
+        {/* Header */}
       <section className="pt-24 pb-12 hero-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-6">
@@ -243,6 +245,7 @@ export default function NotesHub() {
       </section>
 
       <Footer />
+      </QueryErrorBoundary>
     </div>
   );
 }
