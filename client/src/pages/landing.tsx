@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Search, FileText, Home, Users, GraduationCap } from "lucide-react";
+import { IndiaMap } from "@/components/ui/india-map";
 
 export default function Landing() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,6 +22,34 @@ export default function Landing() {
     (result.author && result.author.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (result.category && result.category.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  // India city connections for the map
+  const indiaConnections = [
+    {
+      start: { lat: 19.2183, lng: 72.9781, label: "Mumbai" },
+      end: { lat: 18.5204, lng: 73.8567, label: "Pune" }
+    },
+    {
+      start: { lat: 19.9975, lng: 73.7898, label: "Nashik" },
+      end: { lat: 19.2183, lng: 72.9781, label: "Mumbai" }
+    },
+    {
+      start: { lat: 28.7041, lng: 77.1025, label: "Delhi" },
+      end: { lat: 28.4595, lng: 77.0266, label: "Gurgaon" }
+    },
+    {
+      start: { lat: 12.9716, lng: 77.5946, label: "Bangalore" },
+      end: { lat: 13.0827, lng: 80.2707, label: "Chennai" }
+    },
+    {
+      start: { lat: 17.3850, lng: 78.4867, label: "Hyderabad" },
+      end: { lat: 18.5204, lng: 73.8567, label: "Pune" }
+    },
+    {
+      start: { lat: 22.5726, lng: 88.3639, label: "Kolkata" },
+      end: { lat: 20.2961, lng: 85.8245, label: "Bhubaneswar" }
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -129,6 +158,21 @@ export default function Landing() {
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Experience instant access to notes, accommodations, tutoring, and study groups
             </p>
+          </div>
+          
+          {/* India Network Map */}
+          <div className="mb-12">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-foreground mb-2">Students Connecting Across India</h3>
+              <p className="text-muted-foreground">Real-time connections between students in major cities</p>
+            </div>
+            <IndiaMap 
+              dots={indiaConnections}
+              lineColor="#1eb1bf"
+              showLabels={true}
+              animationDuration={2}
+              loop={true}
+            />
           </div>
           
           <div className="max-w-2xl mx-auto">
