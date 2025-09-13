@@ -28,7 +28,7 @@ export default function Landing() {
                   onClick={() => window.location.href = "/signin"}
                   data-testid="button-start-journey"
                 >
-                  Start Your Journey
+                  Sign In
                 </Button>
                 <Button 
                   variant="outline"
@@ -195,7 +195,7 @@ export default function Landing() {
                 onClick={() => window.location.href = "/api/login"}
                 data-testid="button-explore-platform"
               >
-                Explore Platform →
+                Sign In
               </Button>
             </div>
             
