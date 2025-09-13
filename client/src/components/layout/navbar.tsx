@@ -1,17 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/auth-context";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Navbar() {
-  const { user, signOut } = useAuth();
   const [location] = useLocation();
 
   return (
@@ -19,7 +9,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
-            <Link href={user ? "/" : "/"}>
+            <Link href="/">
               <div className="flex items-center space-x-3" data-testid="link-home">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,138 +20,37 @@ export default function Navbar() {
               </div>
             </Link>
             
-            {user && (
-              <div className="hidden md:flex space-x-6">
-                {/* For Students Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-students">
-                      For Students
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48" align="start">
-                    <Link href="/dashboard">
-                      <DropdownMenuItem data-testid="link-student-dashboard">
-                        Dashboard
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/discovery">
-                      <DropdownMenuItem data-testid="link-discovery">
-                        Discover Services
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/map">
-                      <DropdownMenuItem data-testid="link-map-view">
-                        Map View
-                      </DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuSeparator />
-                    <Link href="/browse">
-                      <DropdownMenuItem data-testid="link-browse-notes">
-                        Browse Notes
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/upload">
-                      <DropdownMenuItem data-testid="link-upload-content">
-                        Upload Content
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/study-groups">
-                      <DropdownMenuItem data-testid="link-study-groups">
-                        Study Groups
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/campus-resources">
-                      <DropdownMenuItem data-testid="link-campus-resources">
-                        Campus Resources
-                      </DropdownMenuItem>
-                    </Link>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* For Vendors Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-vendors">
-                      For Vendors
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-48" align="start">
-                    <Link href="/vendors/list-service">
-                      <DropdownMenuItem data-testid="link-list-service">
-                        List Your Service
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/vendors/dashboard">
-                      <DropdownMenuItem data-testid="link-vendor-dashboard">
-                        Vendor Dashboard
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/vendors/pricing">
-                      <DropdownMenuItem data-testid="link-pricing-plans">
-                        Pricing Plans
-                      </DropdownMenuItem>
-                    </Link>
-                    <Link href="/vendors/success-stories">
-                      <DropdownMenuItem data-testid="link-success-stories">
-                        Success Stories
-                      </DropdownMenuItem>
-                    </Link>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
+            <div className="hidden md:flex space-x-6">
+              <Link href="/">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-home-nav">
+                  Home
+                </Button>
+              </Link>
+              <Link href="/about">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-about">
+                  About
+                </Button>
+              </Link>
+              <Link href="/features">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">
+                  Features
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">
+                  Contact
+                </Button>
+              </Link>
+            </div>
           </div>
           
           <div className="flex items-center space-x-4">
-            {!user ? (
-              <>
-                <Button variant="ghost" onClick={() => window.location.href = "/auth-demo"} data-testid="button-sign-in">
-                  Sign In
-                </Button>
-                <Button onClick={() => window.location.href = "/auth-demo"} data-testid="button-get-started">
-                  Get Started
-                </Button>
-              </>
-            ) : (
-              <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="button-user-menu">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt={user?.email || "User"} />
-                        <AvatarFallback>
-                          {user?.email?.[0]?.toUpperCase() || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <div className="flex flex-col space-y-1 p-2">
-                      <p className="text-sm font-medium leading-none" data-testid="text-user-name">
-                        {user?.user_metadata?.full_name || user?.email}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground" data-testid="text-user-email">
-                        {user?.email}
-                      </p>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <Link href="/saved">
-                      <DropdownMenuItem data-testid="menu-item-saved">
-                        Saved Notes
-                      </DropdownMenuItem>
-                    </Link>
-                    <DropdownMenuItem data-testid="menu-item-profile">
-                      Profile Settings
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => signOut()} data-testid="menu-item-logout">
-                      Log Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            )}
+            <Button variant="ghost" onClick={() => window.location.href = "/signin"} data-testid="button-login">
+              Login
+            </Button>
+            <Button onClick={() => window.location.href = "/signin"} data-testid="button-signup-free">
+              Sign Up Free
+            </Button>
           </div>
         </div>
       </div>
