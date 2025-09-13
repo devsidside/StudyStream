@@ -1,0 +1,241 @@
+# Student Resource Platform — One‑Page Landing (Figma‑ready)
+
+**Filename:** `SRP_Landing_OnePage.design` (Figma)
+**Purpose:** Complete, developer‑ready one‑page website design and component library for the Student Resource Platform landing page. Includes responsive layouts (mobile/tablet/desktop), design tokens, component specs, interactions, accessibility notes, and handoff checklist.
+
+---
+
+## 1. Overview & Goals
+
+* **Primary Goal:** Convert visitors (students & vendors) into platform users via clear CTAs and trust-building content.
+* **Secondary Goal:** Establish credibility and show technical & community strength.
+* **Tone:** Trustworthy, community‑focused, modern, approachable.
+* **Deliverables in this file:** Full page artboards (mobile, tablet, desktop), component library, style guide, interaction prototypes, asset exports.
+
+---
+
+## 2. Design Tokens
+
+### Colors
+
+* `--primary` #3B82F6
+* `--secondary` #F59E0B
+* `--accent` #8B5CF6
+* `--success` #10B981
+* `--neutral-100` #F8FAFC
+* `--neutral-500` #64748B
+* `--neutral-900` #1E293B
+* `--glass` rgba(255,255,255,0.6) (for subtle overlays)
+* Gradients:
+
+  * `hero-grad` linear-gradient(180deg,#EAF2FF 0%, #FFFFFF 100%)
+  * `cta-grad` linear-gradient(90deg,#3B82F6 0%, #8B5CF6 100%)
+
+### Typography
+
+* Heading: **Inter** (or Poppins) — weights: 600, 700
+* Body: System stack `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial`
+* Sizes (tokens):
+
+  * `h1` clamp(2.5rem, 5vw, 4rem)
+  * `h2` clamp(2rem, 4vw, 3rem)
+  * `h3` clamp(1.5rem, 3vw, 2rem)
+  * `body` clamp(1rem, 2vw, 1.125rem)
+  * `caption` 0.875rem
+
+### Spacing & Layout
+
+* Base spacing unit: 8px
+* Gutters: 24px (mobile), 32px (desktop)
+* Max content width: 1200px
+* Grid: 12 columns, 24px column gap on desktop, 16px on tablet
+* Section padding: 48px (mobile), 80px (desktop)
+
+### Elevation & Shadows
+
+* `card` shadow: 0 6px 18px rgba(16,24,40,0.06)
+* `lift` on hover: translateY(-6px) + stronger shadow
+
+### Radius
+
+* `sm` 6px, `md` 12px, `lg` 20px, `pill` 9999px
+
+---
+
+## 3. Component Library (Variants & Specs)
+
+Each component exported as Figma component with variants: default / hover / focus / disabled / loading.
+
+### 3.1 Navbar
+
+* **Variants:** Transparent (hero overlay), Solid (on scroll)
+* **Elements:** Logo (left), Nav links (center/hidden on mobile), CTAs (right: "Get Started", "List Your Service")
+* **Mobile:** Hamburger opens slide-out nav.
+* **Accessibility:** Focus ring, aria-expanded on hamburger.
+
+### 3.2 Hero
+
+* **Layout:** 2‑column desktop (60/40), single-column mobile (visual above text).
+* **Content:** H1 (gradient), subhead, dual CTAs (primary filled + secondary outline), trust avatars + microcopy.
+* **Visual:** Illustration group (SVG) with subtle floating animation (Y translate ±6px, 4s ease-in-out infinite).
+* **Spacing:** top padding 10vh, vertical center alignment.
+
+### 3.3 Card (Problem / Feature)
+
+* Widths responsive: full-width on mobile, 3-column grid on desktop.
+* Icon (circle) + stat (large) + small headline + supporting text.
+* Hover lift and slight border color change to `--secondary`.
+
+### 3.4 Feature Block (Alternating)
+
+* Image + content pair. Images are device mockups / map / UI thumbnails.
+* Action link or CTA per block.
+
+### 3.5 Persona Cards (Student / Vendor)
+
+* Avatar, name, quote text, benefits list, CTA button.
+* Variant: compact (grid) or stacked.
+
+### 3.6 Tech Logos Grid
+
+* Monochrome SVG logos with hover reveal color.
+* Accessibility: `aria-hidden` if decorative; add alt if meaningful.
+
+### 3.7 Stats Grid / Social Proof
+
+* 4 metrics with number animation (0→target) and label.
+* University logos carousel (infinite scroll, accessible pausing controls).
+
+### 3.8 Final CTA Banner
+
+* Full-width gradient background, large H2, dual CTAs.
+* Buttons: primary large, secondary outlined. Pulse animation on primary (subtle, prefers-reduced-motion respected).
+
+### 3.9 Footer
+
+* Multi-column links, newsletter signup, legal links, social icons.
+* Dark background (`--neutral-900`) with light text.
+
+---
+
+## 4. Page Layout & Content (Artboards)
+
+Artboards: Mobile (375×auto), Tablet (768×auto), Desktop (1440×auto)
+
+### 4.1 Hero (100vh)
+
+* H1: "Your Complete Student Resource Hub — Connect, Learn, Thrive" (gradient fill on the phrase "Connect, Learn, Thrive")
+* Subhead paragraph
+* Primary CTA: "Start Your Journey" (primary color)
+* Secondary CTA: "List Your Services" (outline)
+* Trust row: avatar stack (up to 6) + microcopy: "Join 10,000+ students"
+* Visual: Illustration (SVG) inside rounded card with soft shadow
+
+### 4.2 Problem Section
+
+* Header: H2 "The Student Struggle is Real" + subtext
+* 3 Cards (stat + text + icon)
+* CTA small link: "See how we help →"
+
+### 4.3 Solution Section
+
+* Split: Left content (headline & benefits), right platform mockup (interactive)
+* Micro-interactions: hover to focus a mockup pane; small autoplayed scroll inside mockup
+
+### 4.4 Features Section (Academic + Lifestyle + Social)
+
+* Alternating blocks (image / text)
+* Each block contains 3–4 feature bullets with small icons
+
+### 4.5 User Types Section
+
+* Two columns: Student (left) / Vendor (right) with persona, benefits, CTA.
+
+### 4.6 Technology & Metrics Section
+
+* Grid of tech logos + 3 counters (uptime, load time, security grade)
+
+### 4.7 Social Proof
+
+* Stats grid + carousel of university logos + 2–3 editorial testimonials with logos
+
+### 4.8 Final CTA
+
+* Large H2 + dual CTA buttons + microcopy benefits
+
+### 4.9 Footer
+
+* 4 columns: For Students / For Vendors / Company / Legal & social
+
+---
+
+## 5. Interaction & Motion Spec
+
+* **Hero onLoad:** Fade up elements (stagger 80ms) — H1 → subhead → CTAs → avatars.
+* **Illustration:** Gentle float (translateY) animation, GPU accelerated (transform only).
+* **Cards onScroll:** IntersectionObserver triggers slide + fade (translateY 16px → 0, opacity 0→1).
+* **Mockup area:** Vertical auto-scroll inside device frame (looped). Pause on hover and when prefers-reduced-motion.
+* **Counters:** animate from 0 to value when in viewport (duration 900–1400ms, easing easeOutCubic).
+* **Nav onScroll:** Transparent to solid background transition after 60px; add subtle blur + shadow.
+* **Button interactions:** scale(0.98) on active; visible focus ring (2px outline using `--primary`).
+
+Performance rules: keep animations in `transform` + `opacity`. No layout-triggering animations.
+
+---
+
+## 6. Accessibility Notes
+
+* Color contrast: verify H1 gradient overlay has a solid fallback for readability; ensure 4.5:1 for body text.
+* Focus states: all interactive controls have visible focus ring and focus order is logical.
+* Keyboard: hamburger and carousels keyboard operable; ARIA labels for important regions.
+* Motion: support `prefers-reduced-motion`; provide non-animated variants.
+* Images: all meaningful images have `alt`; decorative images `aria-hidden=true`.
+
+---
+
+## 7. Assets & Export Guidelines
+
+* Icons: export SVGs (single path, optimized) — stroke 1.5px for small icons, 2px for hero symbols.
+* Illustrations: export as multi-layer SVG with fallback PNG/WebP at 2× sizes.
+* Mockup screens: export WebP responsive images: 360w, 720w, 1200w.
+* Avatars: export 48px, 96px PNG/WebP with circle masks.
+* All assets named using kebab-case with folder structure: `/assets/icons/`, `/assets/illust/`, `/assets/screens/`.
+
+---
+
+## 8. Handoff & Developer Notes
+
+* Provide a token JSON for developers (colors, fonts, spacing). Example `tokens.json` in the file.
+* Provide component props table (button sizes, CTA variants, card props).
+* Provide sample HTML structure snippets in a separate code tab (Next.js + Tailwind ready): hero, card grid, feature block.
+* Provide accessibility checklist and testing notes for QA.
+* Include redlines and spacing specs for every breakpoint.
+
+---
+
+## 9. Prototype & Testing Recommendations
+
+* Create an interactive Figma prototype with anchored nav links and transitions.
+* Conduct A/B tests on hero copy and primary CTA color (primary vs cta‑grad).
+* Run user testing (5–8 students & 2–4 vendors) on prototype to validate comprehension and CTA clarity.
+
+---
+
+## 10. Deliverables bundled in this Figma file
+
+1. Desktop, tablet, mobile artboards (full page).
+2. Component library (Buttons, Cards, Navbar, Footer, Forms, Carousels).
+3. Tokens page (colors, type, spacing).
+4. Interaction specs & prototype.
+5. Export-ready assets (icons, illustrations, mockups).
+6. Handoff notes + `tokens.json` + sample Tailwind token map.
+
+---
+
+If you'd like, I can now:
+
+* Export a ready Tailwind + React component file set for the landing page (JSX + Tailwind classes), or
+* Generate the `tokens.json` and a Storybook-ready component playground, or
+* Produce a lightweight clickable HTML prototype you can host immediately.
+
+Which of the above would you like me to create next?
