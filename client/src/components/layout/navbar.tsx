@@ -1,136 +1,59 @@
-import { useState } from 'react';
-import { Search, User, ChevronDown, LogIn, Menu, X } from 'lucide-react';
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const [location] = useLocation();
 
   return (
-    <nav className="flex justify-between items-center p-4 md:p-6 lg:px-16 relative bg-white">
-      {/* Logo section */}
-      <div className='start flex gap-2 md:gap-4 h-8 md:h-10'>
-        <img
-          src="https://i.postimg.cc/jSGr83xS/alogo.png"
-          className='h-full object-contain'
-          alt="Logo"
-          data-testid="img-logo"
-        />
-        <img
-          src="https://i.postimg.cc/wjNrBqz9/atit.png"
-          className='h-full object-contain hidden sm:block'
-          alt="Brand name"
-          data-testid="img-brand"
-        />
-      </div>
-
-      {/* Desktop Navigation */}
-      <div className='mid hidden md:flex space-x-6 lg:space-x-10 font-semibold text-lg lg:text-xl text-gray-500'>
-        <div className="relative text-green-800/50 group cursor-pointer" data-testid="link-home">
-          Home
-          <span className="absolute bottom-0 left-0 w-1/2 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
-        </div>
-        <div className="relative group cursor-pointer" data-testid="link-about">
-          About
-          <span className="absolute bottom-0 left-0 w-0 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
-        </div>
-        <div className='relative group cursor-pointer' data-testid="link-courses">
-          <img
-            src="https://i.postimg.cc/Z5YrhP8h/lo.png"
-            className='absolute -top-5 lg:-top-7 left-4 lg:left-6 w-4 lg:w-auto'
-            alt="Course icon"
-          />
-          Courses
-          <span className="absolute bottom-0 left-0 w-0 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
-        </div>
-        <div className="relative group cursor-pointer" data-testid="link-contact">
-          Contact
-          <span className="absolute bottom-0 left-0 w-0 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
-        </div>
-      </div>
-
-      {/* Desktop Right Section */}
-      <div className='end hidden md:flex items-center space-x-4'>
-        <div className='begin flex items-center space-x-3 lg:space-x-5'>
-          <Search className='cursor-pointer w-5 h-5 text-gray-500' data-testid="button-search" />
-          <img
-            src="https://i.postimg.cc/VsjB5JrG/image.png"
-            className='h-6 lg:h-8 cursor-pointer'
-            alt="User profile"
-            data-testid="img-profile"
-          />
-          <div className='flex items-center space-x-1 lg:space-x-2 cursor-pointer' data-testid="button-language">
-            <span className='text-lg font-semibold text-gray-600'>EN</span>
-            <ChevronDown className='w-4 h-4 text-gray-500' />
-          </div>
-        </div>
-        <div className="text-white bg-amber-500 flex items-center space-x-2 px-4 lg:px-6 py-2 lg:py-3 rounded-full font-semibold shadow-[0_8px_20px_rgba(245,158,11,0.4)] cursor-pointer hover:bg-amber-600 transition-colors" data-testid="button-login">
-          <LogIn className='w-5 h-5' />
-          <span>Login</span>
-        </div>
-      </div>
-
-      {/* Mobile menu button */}
-      <div className='md:hidden flex items-center'>
-        <button
-          onClick={toggleMenu}
-          className="text-gray-500 focus:outline-none"
-          data-testid="button-menu"
-        >
-          {isMenuOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg z-50 p-4" data-testid="menu-mobile">
-          <div className="flex flex-col space-y-4">
-            <div className="text-green-800/50 font-semibold py-2 border-b border-gray-200 cursor-pointer" data-testid="link-home-mobile">
-              Home
-            </div>
-            <div className="text-gray-500 font-semibold py-2 border-b border-gray-200 cursor-pointer" data-testid="link-about-mobile">
-              About
-            </div>
-            <div className="text-gray-500 font-semibold py-2 border-b border-gray-200 flex items-center cursor-pointer" data-testid="link-courses-mobile">
-              <img
-                src="https://i.postimg.cc/Z5YrhP8h/lo.png"
-                className='w-5 mr-2'
-                alt="Course icon"
-              />
-              Courses
-            </div>
-            <div className="text-gray-500 font-semibold py-2 border-b border-gray-200 cursor-pointer" data-testid="link-contact-mobile">
-              Contact
-            </div>
-
-            <div className="flex items-center justify-between pt-4">
-              <div className='flex items-center space-x-4'>
-                <Search className='cursor-pointer w-5 h-5 text-gray-500' data-testid="button-search-mobile" />
-                <img
-                  src="https://i.postimg.cc/VsjB5JrG/image.png"
-                  className='h-6 cursor-pointer'
-                  alt="User profile"
-                  data-testid="img-profile-mobile"
-                />
-                <div className='flex items-center space-x-1 cursor-pointer' data-testid="button-language-mobile">
-                  <span className='font-semibold text-gray-600'>EN</span>
-                  <ChevronDown className='w-4 h-4 text-gray-500' />
+    <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center space-x-8">
+            <Link href="/">
+              <div className="flex items-center space-x-3" data-testid="link-home">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                  </svg>
                 </div>
+                <span className="text-xl font-bold text-foreground">StudyConnect</span>
               </div>
-              <div className="text-white bg-amber-500 flex items-center space-x-2 px-4 py-2 rounded-full font-semibold shadow-[0_8px_20px_rgba(245,158,11,0.4)] cursor-pointer" data-testid="button-login-mobile">
-                <LogIn className='w-5 h-5' />
-                <span>Login</span>
-              </div>
+            </Link>
+            
+            <div className="hidden md:flex space-x-6">
+              <Link href="/">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-home-nav">
+                  Home
+                </Button>
+              </Link>
+              <Link href="/about">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-about">
+                  About
+                </Button>
+              </Link>
+              <Link href="/features">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">
+                  Features
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">
+                  Contact
+                </Button>
+              </Link>
             </div>
           </div>
+          
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" onClick={() => window.location.href = "/signin"} data-testid="button-login">
+              Login
+            </Button>
+            <Button onClick={() => window.location.href = "/signin"} data-testid="button-signup-free">
+              Sign Up Free
+            </Button>
+          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }
