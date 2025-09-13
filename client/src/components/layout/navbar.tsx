@@ -1,5 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown, Search, BookOpen, Home, Users, GraduationCap, Smartphone, Trophy, FileText, BarChart3, DollarSign, TrendingUp, Target, Handshake, MessageCircle } from "lucide-react";
 
 export default function Navbar() {
   const [location] = useLocation();
@@ -21,24 +23,93 @@ export default function Navbar() {
             </Link>
             
             <div className="hidden md:flex space-x-6">
-              <Link href="/">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-home-nav">
-                  Home
+              <Link href="/how-it-works">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-how-it-works">
+                  How It Works
                 </Button>
               </Link>
-              <Link href="/about">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-about">
-                  About
-                </Button>
-              </Link>
-              <Link href="/features">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-features">
-                  Features
-                </Button>
-              </Link>
-              <Link href="/contact">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-contact">
-                  Contact
+              
+              {/* For Students Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-for-students">
+                    For Students <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuItem>
+                    <Search className="mr-2 h-4 w-4" />
+                    <Link href="/browse" className="flex-1" data-testid="link-browse-services">Browse All Services</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    <Link href="/notes" className="flex-1" data-testid="link-study-notes">Study Notes & Resources</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Home className="mr-2 h-4 w-4" />
+                    <Link href="/accommodation" className="flex-1" data-testid="link-accommodation">Find Accommodation</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <GraduationCap className="mr-2 h-4 w-4" />
+                    <Link href="/tutors" className="flex-1" data-testid="link-tutors">Book Tutors & Coaching</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Users className="mr-2 h-4 w-4" />
+                    <Link href="/events" className="flex-1" data-testid="link-events">Events & Study Groups</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Smartphone className="mr-2 h-4 w-4" />
+                    <Link href="/mobile-app" className="flex-1" data-testid="link-mobile-app">Mobile App</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Trophy className="mr-2 h-4 w-4" />
+                    <Link href="/student-success" className="flex-1" data-testid="link-student-success">Student Success Stories</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* For Vendors Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-for-vendors">
+                    For Vendors <ChevronDown className="ml-1 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuItem>
+                    <FileText className="mr-2 h-4 w-4" />
+                    <Link href="/vendor/list-service" className="flex-1" data-testid="link-list-service">List Your Service</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    <Link href="/vendor/dashboard" className="flex-1" data-testid="link-vendor-dashboard">Vendor Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <DollarSign className="mr-2 h-4 w-4" />
+                    <Link href="/vendor/pricing" className="flex-1" data-testid="link-vendor-pricing">Pricing & Plans</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    <Link href="/vendor/marketing" className="flex-1" data-testid="link-marketing-tools">Marketing Tools</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Target className="mr-2 h-4 w-4" />
+                    <Link href="/vendor/success" className="flex-1" data-testid="link-vendor-success">Success Stories</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Handshake className="mr-2 h-4 w-4" />
+                    <Link href="/vendor/partner" className="flex-1" data-testid="link-partner-program">Partner Program</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    <Link href="/vendor/support" className="flex-1" data-testid="link-vendor-support">Support Center</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Link href="/pricing">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">
+                  Pricing
                 </Button>
               </Link>
             </div>
