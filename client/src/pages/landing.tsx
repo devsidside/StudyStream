@@ -127,8 +127,8 @@ export default function Landing() {
                 />
               </div>
               <div className='flex flex-col gap-0 sm:gap-1'>
-                <span className='text-lg sm:text-xl md:text-2xl text-[#1eb1bf] font-bold' data-testid="text-free-courses">250k</span>
-                <span className='text-xs sm:text-sm md:text-base font-semibold text-gray-500'>Free Courses</span>
+                <span className='text-lg sm:text-xl md:text-2xl text-[#1eb1bf] font-bold' data-testid="text-reviews">4.9</span>
+                <span className='text-xs sm:text-sm md:text-base font-semibold text-gray-500'>Reviews</span>
               </div>
             </div>
 
