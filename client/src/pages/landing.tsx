@@ -25,7 +25,7 @@ export default function Landing() {
                 <Button 
                   size="lg"
                   className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all transform hover:scale-105"
-                  onClick={() => window.location.href = "/api/login"}
+                  onClick={() => window.location.href = "/signin"}
                   data-testid="button-start-journey"
                 >
                   Start Your Journey
@@ -34,7 +34,7 @@ export default function Landing() {
                   variant="outline"
                   size="lg"
                   className="border border-border text-foreground px-8 py-4 rounded-xl font-semibold hover:bg-muted transition-colors"
-                  onClick={() => window.location.href = "/api/login"}
+                  onClick={() => window.location.href = "/signin"}
                   data-testid="button-list-services"
                 >
                   List Your Services

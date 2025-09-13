@@ -24,6 +24,7 @@ import Discovery from "@/pages/discovery";
 import MapView from "@/pages/map-view";
 import AuthDemo from "@/pages/auth-demo";
 import AuthCallback from "@/pages/auth/callback";
+import SignIn from "@/pages/signin";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -33,6 +34,7 @@ function Router() {
       {loading || !user ? (
         <>
           <Route path="/" component={Landing} />
+          <Route path="/signin" component={SignIn} />
           <Route path="/auth-demo" component={AuthDemo} />
           <Route path="/auth/callback" component={AuthCallback} />
         </>
