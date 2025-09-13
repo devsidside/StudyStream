@@ -10,6 +10,19 @@ The system facilitates two main user types: students who consume resources and v
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### September 13, 2025 - Hero Section Refactoring
+- **Modular Hero Components**: Refactored monolithic hero section (~93 lines) into 5 reusable components:
+  - `HeroContent`: Left side text content with headline, description, and CTA button
+  - `FloatingIcons`: Decorative icons (batch icon and graduation cap)
+  - `FloatingStats`: Statistics cards displaying quality metrics (4.9 Reviews, 150k Active Students)
+  - `HeroVisual`: Right side image container combining floating elements
+  - `HeroSection`: Main component orchestrating content and visual sections
+- **Quality Focus**: Updated statistics from volume metrics ("250k Free Courses") to quality indicators ("4.9 Reviews")
+- **Design Consistency**: Standardized floating card layouts with consistent spacing and responsive behavior
+- **Component Architecture**: Improved maintainability and reusability while preserving all original styling and functionality
+
 ## System Architecture
 
 ### Frontend Architecture
