@@ -44,8 +44,8 @@ export default function Landing() {
             <p className='text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 font-medium mt-4 md:mt-6 lg:mt-8 max-w-md'>
               A learning system based on formalised teaching but with the help of electronic resources.
             </p>
-            <div className="text-white w-fit mt-6 md:mt-8 bg-[#1eb1bf] flex items-center space-x-2 p-3 md:p-4 px-5 md:px-6 rounded-full font-semibold shadow-[0_8px_30px_rgba(30,177,191,0.4)] hover:bg-[#189ba8] transition-colors cursor-pointer" onClick={() => window.location.href = "/signin"} data-testid="button-learn-now">
-              <span className="text-sm md:text-base">LEARN NOW &gt;</span>
+            <div className="text-white w-fit mt-6 md:mt-8 bg-[#1eb1bf] flex items-center space-x-2 p-3 md:p-4 px-5 md:px-6 rounded-full font-semibold shadow-[0_8px_30px_rgba(30,177,191,0.4)] hover:bg-[#189ba8] transition-colors cursor-pointer" onClick={() => window.location.href = "/signin"} data-testid="button-join-now">
+              <span className="text-sm md:text-base">JOIN NOW &gt;</span>
             </div>
           </div>
 
