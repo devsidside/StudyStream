@@ -1,8 +1,27 @@
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Search, FileText, Home, Users, GraduationCap } from "lucide-react";
 
 export default function Landing() {
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Sample search results for live preview
+  const sampleResults = [
+    { id: 1, type: "notes", title: "Data Structures & Algorithms Notes", author: "Sarah M.", rating: 4.8, category: "Computer Science", icon: FileText },
+    { id: 2, type: "hostel", title: "Green Valley Hostel", location: "Near Campus", rating: 4.5, price: "₹8,000/month", icon: Home },
+    { id: 3, type: "tutoring", title: "Mathematics Tutoring", instructor: "Prof. Kumar", rating: 4.9, price: "₹500/hour", icon: GraduationCap },
+    { id: 4, type: "study-group", title: "Physics Study Group", members: 12, topic: "Quantum Mechanics", icon: Users },
+  ];
+  
+  const filteredResults = sampleResults.filter(result => 
+    result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (result.author && result.author.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (result.category && result.category.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -101,6 +120,113 @@ export default function Landing() {
           </div>
         </div>
       </div>
+
+      {/* Live Search Preview Section */}
+      <section className="py-16 bg-gradient-to-b from-background to-muted/20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-primary">LIVE SEARCH PREVIEW</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Experience instant access to notes, accommodations, tutoring, and study groups
+            </p>
+          </div>
+          
+          <div className="max-w-2xl mx-auto">
+            {/* Search Input */}
+            <div className="relative mb-8">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                type="text"
+                placeholder="Search notes, hostels, tutoring, study groups..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 pr-4 py-4 text-lg rounded-2xl border-2 border-primary/20 focus:border-primary transition-colors"
+                data-testid="input-live-search"
+              />
+            </div>
+            
+            {/* Search Results */}
+            <div className="space-y-4">
+              {(searchQuery.length > 0 ? filteredResults : sampleResults).slice(0, 4).map((result) => {
+                const IconComponent = result.icon;
+                return (
+                  <div key={result.id} className="bg-card rounded-xl p-4 border border-border hover:shadow-lg transition-all duration-300 hover-lift cursor-pointer" data-testid={`result-${result.type}-${result.id}`}>
+                    <div className="flex items-start space-x-4">
+                      <div className={`p-3 rounded-lg ${
+                        result.type === 'notes' ? 'bg-primary/10' :
+                        result.type === 'hostel' ? 'bg-secondary/10' :
+                        result.type === 'tutoring' ? 'bg-accent/10' :
+                        'bg-primary/10'
+                      }`}>
+                        <IconComponent className={`w-6 h-6 ${
+                          result.type === 'notes' ? 'text-primary' :
+                          result.type === 'hostel' ? 'text-secondary' :
+                          result.type === 'tutoring' ? 'text-accent' :
+                          'text-primary'
+                        }`} />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg text-foreground">{result.title}</h3>
+                            {result.author && (
+                              <p className="text-sm text-muted-foreground">by {result.author}</p>
+                            )}
+                            {result.location && (
+                              <p className="text-sm text-muted-foreground">{result.location}</p>
+                            )}
+                            {result.instructor && (
+                              <p className="text-sm text-muted-foreground">with {result.instructor}</p>
+                            )}
+                            {result.members && (
+                              <p className="text-sm text-muted-foreground">{result.members} members</p>
+                            )}
+                          </div>
+                          
+                          <div className="text-right">
+                            {result.rating && (
+                              <div className="flex items-center space-x-1 mb-1">
+                                <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                                </svg>
+                                <span className="text-sm font-medium">{result.rating}</span>
+                              </div>
+                            )}
+                            {result.price && (
+                              <p className="text-sm font-semibold text-primary">{result.price}</p>
+                            )}
+                            {result.category && (
+                              <span className="inline-block px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">{result.category}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {searchQuery.length > 0 && filteredResults.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No results found. Try searching for "data", "hostel", or "math"</p>
+                </div>
+              )}
+            </div>
+            
+            {/* CTA Button */}
+            <div className="text-center mt-8">
+              <Button 
+                className="bg-primary text-primary-foreground px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                onClick={() => window.location.href = "/api/login"}
+                data-testid="button-explore-full-platform"
+              >
+                Explore Full Platform
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Problem Section */}
       <section className="py-20 bg-muted/30">
