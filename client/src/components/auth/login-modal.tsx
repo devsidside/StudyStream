@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { X } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -30,6 +31,7 @@ interface LoginModalProps {
 
 export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signIn } = useAuth();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -43,11 +45,13 @@ export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginM
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
     try {
-      // Here you would typically make an API call to authenticate
-      console.log("Logging in with data:", data);
+      const { error } = await signIn(data.email, data.password);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (error) {
+        console.error("Error logging in:", error);
+        // You would show this error to the user in a real app
+        return;
+      }
       
       // Close modal on success
       onOpenChange(false);

@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { X } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -37,6 +38,7 @@ interface SignupModalProps {
 
 export default function SignupModal({ open, onOpenChange, onLoginClick, onSignupSuccess }: SignupModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signUp } = useAuth();
 
   const form = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -90,11 +92,13 @@ export default function SignupModal({ open, onOpenChange, onLoginClick, onSignup
   const onSubmit = async (data: SignupFormData) => {
     setIsSubmitting(true);
     try {
-      // Here you would typically make an API call to create the account
-      console.log("Creating account with data:", data);
+      const { error } = await signUp(data.email, data.password);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (error) {
+        console.error("Error creating account:", error);
+        // You would show this error to the user in a real app
+        return;
+      }
       
       // Close modal and trigger verification flow
       onOpenChange(false);

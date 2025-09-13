@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/auth-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Navbar() {
-  const { isAuthenticated, user } = useAuth();
+  const { user, signOut } = useAuth();
   const [location] = useLocation();
 
   return (
@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
-            <Link href={isAuthenticated ? "/" : "/"}>
+            <Link href={user ? "/" : "/"}>
               <div className="flex items-center space-x-3" data-testid="link-home">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@ export default function Navbar() {
               </div>
             </Link>
             
-            {isAuthenticated && (
+            {user && (
               <div className="hidden md:flex space-x-6">
                 {/* For Students Dropdown */}
                 <DropdownMenu>
@@ -114,32 +114,24 @@ export default function Navbar() {
           </div>
           
           <div className="flex items-center space-x-4">
-            {!isAuthenticated ? (
+            {!user ? (
               <>
-                <Button variant="ghost" onClick={() => window.location.href = "/api/login"} data-testid="button-sign-in">
+                <Button variant="ghost" onClick={() => window.location.href = "/auth-demo"} data-testid="button-sign-in">
                   Sign In
                 </Button>
-                <Button onClick={() => window.location.href = "/api/login"} data-testid="button-get-started">
+                <Button onClick={() => window.location.href = "/auth-demo"} data-testid="button-get-started">
                   Get Started
                 </Button>
               </>
             ) : (
               <>
-                {user?.role === 'admin' && (
-                  <Link href="/admin">
-                    <Button variant="outline" size="sm" data-testid="button-admin">
-                      Admin
-                    </Button>
-                  </Link>
-                )}
-                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full" data-testid="button-user-menu">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || "User"} />
+                        <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt={user?.email || "User"} />
                         <AvatarFallback>
-                          {user?.firstName?.[0] || user?.email?.[0] || 'U'}
+                          {user?.email?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -147,7 +139,7 @@ export default function Navbar() {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex flex-col space-y-1 p-2">
                       <p className="text-sm font-medium leading-none" data-testid="text-user-name">
-                        {user?.firstName} {user?.lastName}
+                        {user?.user_metadata?.full_name || user?.email}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground" data-testid="text-user-email">
                         {user?.email}
@@ -163,7 +155,7 @@ export default function Navbar() {
                       Profile Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => window.location.href = "/api/logout"} data-testid="menu-item-logout">
+                    <DropdownMenuItem onClick={() => signOut()} data-testid="menu-item-logout">
                       Log Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
