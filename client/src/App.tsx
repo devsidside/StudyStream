@@ -22,6 +22,7 @@ import SuccessStories from "@/pages/vendors/success-stories";
 import StudentDashboard from "@/pages/student-dashboard";
 import Discovery from "@/pages/discovery";
 import MapView from "@/pages/map-view";
+import AuthDemo from "@/pages/auth-demo";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -48,6 +49,7 @@ function Router() {
           <Route path="/dashboard" component={StudentDashboard} />
           <Route path="/discovery" component={Discovery} />
           <Route path="/map" component={MapView} />
+          <Route path="/auth-demo" component={AuthDemo} />
         </>
       )}
       <Route component={NotFound} />
