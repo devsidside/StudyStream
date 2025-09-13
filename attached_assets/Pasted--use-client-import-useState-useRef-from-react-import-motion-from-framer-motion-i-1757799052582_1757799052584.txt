@@ -1,0 +1,501 @@
+"use client";
+import { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import DottedMap from "dotted-map";
+import Image from "next/image";
+import { 
+  Search, 
+  MapPin, 
+  BookOpen, 
+  Users, 
+  Home, 
+  Calendar,
+  Star,
+  Menu,
+  X
+} from "lucide-react";
+
+// India Map Component
+function IndiaMap() {
+  const [hoveredCity, setHoveredCity] = useState<string | null>(null);
+  
+  const cities = [
+    { lat: 28.6139, lng: 77.2090, name: "Delhi", serviceCount: 2.3 },
+    { lat: 19.0760, lng: 72.8777, name: "Mumbai", serviceCount: 1.8 },
+    { lat: 12.9716, lng: 77.5946, name: "Bangalore", serviceCount: 2.1 },
+    { lat: 13.0827, lng: 80.2707, name: "Chennai", serviceCount: 1.5 },
+    { lat: 18.5204, lng: 73.8567, name: "Pune", serviceCount: 1.2 },
+    { lat: 17.3850, lng: 78.4867, name: "Hyderabad", serviceCount: 0.9 },
+  ];
+
+  const map = new DottedMap({ height: 60, grid: "diagonal" });
+  const svgMap = map.getSVG({
+    radius: 0.22,
+    color: "#00000040",
+    shape: "circle",
+    backgroundColor: "#f8fafc",
+  });
+
+  const projectPoint = (lat: number, lng: number) => {
+    const x = ((lng - 68) / (97 - 68)) * 800;
+    const y = ((37 - lat) / (37 - 8)) * 400;
+    return { x, y };
+  };
+
+  return (
+    <div className="w-full aspect-[2/1] bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg relative overflow-hidden">
+      <Image
+        src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}
+        className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
+        alt="India map"
+        height="400"
+        width="800"
+        draggable={false}
+      />
+      
+      <svg viewBox="0 0 800 400" className="w-full h-full absolute inset-0">
+        {cities.map((city, i) => {
+          const point = projectPoint(city.lat, city.lng);
+          return (
+            <g key={`city-${i}`}>
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r="4"
+                fill="#0BC5EA"
+                className="cursor-pointer"
+                onMouseEnter={() => setHoveredCity(city.name)}
+                onMouseLeave={() => setHoveredCity(null)}
+              />
+              <circle cx={point.x} cy={point.y} r="4" fill="#0BC5EA" opacity="0.6">
+                <animate attributeName="r" from="4" to="15" dur="2s" begin={`${i * 0.3}s`} repeatCount="indefinite" />
+                <animate attributeName="opacity" from="0.6" to="0" dur="2s" begin={`${i * 0.3}s`} repeatCount="indefinite" />
+              </circle>
+              <text x={point.x} y={point.y - 18} textAnchor="middle" className="fill-slate-700 text-xs font-medium">
+                {city.name}
+              </text>
+              <text x={point.x} y={point.y - 5} textAnchor="middle" className="fill-slate-500 text-[10px]">
+                {city.serviceCount}k
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+export default function StudyConnectLanding() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("Delhi");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const sampleResults = [
+    {
+      id: 1,
+      title: "Data Structures & Algorithms Notes",
+      author: "Sarah M. • CS • IIT Delhi",
+      rating: 4.8,
+      reviews: 124,
+      price: "Free",
+      tags: ["CS", "IIT", "Final Exam"],
+      icon: BookOpen
+    },
+    {
+      id: 2,
+      title: "Green Valley Boys Hostel",
+      author: "500m from IIT Gate",
+      rating: 4.2,
+      reviews: 89,
+      price: "₹8,000/month",
+      tags: ["AC", "WiFi", "Verified"],
+      icon: Home
+    },
+    {
+      id: 3,
+      title: "Prof. Kumar - Math Tutor",
+      author: "IIT Graduate • 5+ yrs exp",
+      rating: 4.9,
+      reviews: 156,
+      price: "₹500/hr",
+      tags: ["Online", "JEE", "NEET"],
+      icon: Users
+    },
+    {
+      id: 4,
+      title: "Tech Workshop Tomorrow",
+      author: "AI & Machine Learning",
+      rating: 4.7,
+      reviews: 45,
+      price: "Free",
+      tags: ["Certificate", "Free"],
+      icon: Calendar
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="border-b bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                🎓
+              </div>
+              <span className="text-xl font-bold text-gray-900">StudyConnect</span>
+            </div>
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              <button className="text-gray-700 hover:text-teal-600 px-3 py-2 text-sm font-medium">
+                For Students
+              </button>
+              <button className="text-gray-700 hover:text-teal-600 px-3 py-2 text-sm font-medium">
+                For Vendors
+              </button>
+              <button className="text-gray-700 hover:text-teal-600 px-3 py-2 text-sm font-medium">
+                How It Works
+              </button>
+              <button className="text-gray-700 hover:text-teal-600 px-3 py-2 text-sm font-medium">
+                Pricing
+              </button>
+              <button className="text-gray-700 hover:text-teal-600 px-3 py-2 text-sm font-medium">
+                Login
+              </button>
+              <button className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg text-sm font-medium">
+                Sign Up Free
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t">
+            <div className="px-4 py-2 space-y-2">
+              <button className="block w-full text-left px-3 py-2 text-gray-700">For Students</button>
+              <button className="block w-full text-left px-3 py-2 text-gray-700">For Vendors</button>
+              <button className="block w-full text-left px-3 py-2 text-gray-700">How It Works</button>
+              <button className="block w-full text-left px-3 py-2 text-gray-700">Login</button>
+              <button className="block w-full bg-teal-500 text-white px-3 py-2 rounded-lg">Sign Up Free</button>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-slate-50 to-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight"
+              >
+                Find Everything You Need for College{" "}
+                <span className="text-teal-500">in One Place</span>
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-lg text-gray-600 mt-6"
+              >
+                From study notes to hostels, tutors to events - access 10,000+ verified services with real-time availability and instant booking.
+              </motion.p>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-8 flex flex-col sm:flex-row gap-4"
+              >
+                <button className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-semibold">
+                  🚀 Get Started Free
+                </button>
+                <button className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg font-semibold">
+                  👁️ Browse Without Signup
+                </button>
+              </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-8 flex flex-wrap gap-6 text-sm text-gray-600"
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="text-teal-500">✓</span>
+                  <span>250k+ Students</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-teal-500">✓</span>
+                  <span>10k+ Services</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-teal-500">✓</span>
+                  <span>4.9★ Rating</span>
+                </div>
+              </motion.div>
+            </div>
+            
+            {/* Hero Image */}
+            <div className="relative">
+              <div className="bg-gradient-to-br from-teal-400 to-blue-500 rounded-full w-80 h-80 mx-auto relative">
+                <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-32 h-32 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
+                      <Users className="w-16 h-16 text-gray-600" />
+                    </div>
+                    <p className="text-gray-800 font-semibold">Student Success</p>
+                  </div>
+                </div>
+                <div className="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-3">
+                  <p className="text-xs font-semibold">250k+</p>
+                  <p className="text-xs text-gray-600">Students</p>
+                </div>
+                <div className="absolute -bottom-4 -left-4 bg-white rounded-lg shadow-lg p-3">
+                  <p className="text-xs font-semibold">⭐ 4.9</p>
+                  <p className="text-xs text-gray-600">Rating</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Try It Yourself Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              🔍 TRY IT YOURSELF
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Experience instant access to notes, accommodations, tutoring, and study groups across India
+            </p>
+          </div>
+
+          {/* Search Interface */}
+          <div className="bg-gradient-to-r from-slate-50 to-white rounded-xl border shadow-sm p-6 mb-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search: notes, hostels, tutors, events..."
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 bg-white"
+                >
+                  <option value="Delhi">Delhi</option>
+                  <option value="Mumbai">Mumbai</option>
+                  <option value="Bangalore">Bangalore</option>
+                </select>
+              </div>
+              <button className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-semibold">
+                Search
+              </button>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="text-sm text-gray-600">💡 Popular:</span>
+              {["Data Structures Notes", "PG near campus", "NEET Coaching"].map((tag) => (
+                <button key={tag} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm">
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Map and Results */}
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* India Map */}
+            <div className="bg-white rounded-xl border shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Services Across India</h3>
+              <IndiaMap />
+              <div className="mt-4 space-y-2">
+                {[
+                  { city: "Delhi", count: "2.3k" },
+                  { city: "Mumbai", count: "1.8k" },
+                  { city: "Bangalore", count: "2.1k" },
+                  { city: "Chennai", count: "1.5k" }
+                ].map((item) => (
+                  <div key={item.city} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <span className="text-gray-700">• {item.city}</span>
+                    <span className="text-teal-600 font-semibold">{item.count} services</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Results */}
+            <div className="bg-white rounded-xl border shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Instant Results</h3>
+              <div className="space-y-4">
+                {sampleResults.map((result) => {
+                  const IconComponent = result.icon;
+                  return (
+                    <div key={result.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex space-x-3">
+                        <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
+                          <IconComponent className="w-5 h-5 text-teal-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 text-sm">{result.title}</h4>
+                          <p className="text-xs text-gray-600 mt-1">{result.author}</p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-3 h-3 ${i < Math.floor(result.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                              ))}
+                              <span className="text-xs text-gray-600 ml-1">{result.rating} ({result.reviews})</span>
+                            </div>
+                            <span className="text-xs font-semibold text-teal-600">{result.price}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {result.tags.map((tag) => (
+                              <span key={tag} className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="flex space-x-2 mt-3">
+                            <button className="bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1 rounded text-xs font-medium">
+                              View
+                            </button>
+                            <button className="bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-1 rounded text-xs font-medium">
+                              Save
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <button className="w-full mt-4 bg-gray-50 hover:bg-gray-100 text-gray-700 py-3 rounded-lg font-medium">
+                Show All 2,347 Results →
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Problem Section */}
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            The Student Struggle is Real
+          </h2>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
+            Students spend countless hours searching for resources, quality accommodations, and reliable services. We're here to change that.
+          </p>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: "⏰", title: "6+ Hours Wasted Weekly", desc: "Students spend hours searching across multiple platforms" },
+              { icon: "💰", title: "40% Higher Costs", desc: "Without proper information, students often pay more" },
+              { icon: "😔", title: "Isolated Communities", desc: "Lack of proper platforms for academic collaboration" }
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white rounded-xl p-8 shadow-sm"
+              >
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                <p className="text-gray-600">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-teal-500 to-blue-600 text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Ready to Transform Your Student Experience?
+          </h2>
+          <p className="text-lg mb-8 opacity-90">
+            Join 250,000+ students who are already saving time, finding better resources, and building meaningful connections through StudyConnect
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="bg-white text-teal-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50">
+              🚀 Start Your Journey - FREE
+            </button>
+            <button className="border border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white/10">
+              📱 Download Mobile App
+            </button>
+          </div>
+          <p className="text-sm mt-6 opacity-75">
+            ✅ Free forever • ⚡ Instant setup • 🔒 100% secure
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                  🎓
+                </div>
+                <span className="text-xl font-bold">StudyConnect</span>
+              </div>
+              <p className="text-gray-400 text-sm">India's largest student resource platform</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">For Students</h3>
+              <div className="space-y-2 text-sm text-gray-400">
+                <p>Browse Services</p>
+                <p>Upload Notes</p>
+                <p>Find Study Groups</p>
+                <p>Mobile App</p>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">For Vendors</h3>
+              <div className="space-y-2 text-sm text-gray-400">
+                <p>List Your Service</p>
+                <p>Vendor Dashboard</p>
+                <p>Pricing Plans</p>
+                <p>Support</p>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Company</h3>
+              <div className="space-y-2 text-sm text-gray-400">
+                <p>About Us</p>
+                <p>Careers</p>
+                <p>Contact</p>
+                <p>Privacy Policy</p>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+            © 2024 StudyConnect. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
