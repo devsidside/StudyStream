@@ -1,0 +1,304 @@
+import React, { useState } from 'react'
+ //replace the svgs with icons if you want to reduce the lines of codes
+ 
+const Landing = () => {
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  return (
+    <div className='w-full overflow-x-hidden'>
+      {/* Navbar */}
+      <nav className="flex justify-between items-center p-4 md:p-6 lg:px-16 relative">
+        {/* Logo section */}
+        <div className='start flex gap-2 md:gap-4 h-8 md:h-10'>
+          <img
+            src="https://i.postimg.cc/jSGr83xS/alogo.png"
+            className='h-full object-contain'
+            alt="Logo"
+          />
+          <img
+            src="https://i.postimg.cc/wjNrBqz9/atit.png"
+            className='h-full object-contain hidden sm:block'
+            alt="Brand name"
+          />
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className='mid hidden md:flex space-x-6 lg:space-x-10 font-semibold text-lg lg:text-xl text-gray-500'>
+          <div className="relative text-green-800/50 group">
+            Home
+            <span className="absolute bottom-0 left-0 w-1/2 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
+          </div>
+          <div className="relative group">
+            About
+            <span className="absolute bottom-0 left-0 w-0 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
+          </div>
+          <div className='relative group'>
+            <img
+              src="https://i.postimg.cc/Z5YrhP8h/lo.png"
+              className='absolute -top-5 lg:-top-7 left-4 lg:left-6 w-4 lg:w-auto'
+              alt="Course icon"
+            />
+            Courses
+            <span className="absolute bottom-0 left-0 w-0 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
+          </div>
+          <div className="relative group">
+            Contact
+            <span className="absolute bottom-0 left-0 w-0 border-b-2 border-green-800/50 group-hover:w-full transition-all duration-300"></span>
+          </div>
+        </div>
+
+        {/* Desktop Right Section */}
+        <div className='end hidden md:flex items-center space-x-4'>
+          <div className='begin flex items-center space-x-3 lg:space-x-5 '>
+            <svg
+              className='cursor-pointer'
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M7.39687 14.7937C5.32954 14.7937 3.58009 14.0776 2.14851 12.6452C0.716928 11.2129 0.000759255 9.46344 6.02106e-07 7.39687C-0.000758051 5.3303 0.715411 3.58084 2.14851 2.14851C3.5816 0.716169 5.33106 0 7.39687 0C9.46268 0 11.2125 0.716169 12.6464 2.14851C14.0802 3.58084 14.796 5.3303 14.7937 7.39687C14.7937 8.23139 14.661 9.01849 14.3954 9.75818C14.1299 10.4979 13.7696 11.1522 13.3144 11.7212L19.6871 18.0939C19.8957 18.3025 20 18.568 20 18.8905C20 19.2129 19.8957 19.4784 19.6871 19.6871C19.4784 19.8957 19.2129 20 18.8905 20C18.568 20 18.3025 19.8957 18.0939 19.6871L11.7212 13.3144C11.1522 13.7696 10.4979 14.1299 9.75818 14.3954C9.01849 14.661 8.23139 14.7937 7.39687 14.7937ZM7.39687 12.5178C8.81935 12.5178 10.0286 12.0201 11.0248 11.0247C12.0209 10.0294 12.5185 8.8201 12.5178 7.39687C12.5170 5.97364 12.0193 4.76472 11.0248 3.77013C10.0302 2.77553 8.82086 2.27748 7.39687 2.27596C5.97288 2.27444 4.76396 2.7725 3.77013 3.77013C2.77629 4.76776 2.27824 5.97667 2.27596 7.39687C2.27368 8.81707 2.77174 10.0264 3.77013 11.0247C4.76852 12.0231 5.97743 12.5208 7.39687 12.5178Z"
+                fill="#6E6E6E"
+              />
+            </svg>
+            <img
+              src="https://i.postimg.cc/VsjB5JrG/image.png"
+              className='h-6 lg:h-8 cursor-pointer'
+              alt="User profile"
+            />
+            <div className='flex items-center space-x-1 lg:space-x-2 cursor-pointer'>
+              <span className='text-lg font-semibold text-gray-600'>EN</span>
+              <svg
+                width="14"
+                height="8"
+                viewBox="0 0 14 8"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M12.8533 0.000880374L13.9977 1.18961L7.76531 7.66935C7.66545 7.7738 7.54668 7.85671 7.41585 7.91331C7.28501 7.9699 7.14469 7.99907 7.00296 7.99913C6.86124 7.99918 6.7209 7.97013 6.59002 7.91364C6.45915 7.85715 6.34033 7.77434 6.24039 7.66997L0.000353723 1.19526L1.14391 0.00672794L7.00069 6.0837L12.8533 0.000880374Z"
+                  fill="#6E6E6E"
+                />
+              </svg>
+            </div>
+          </div>
+          <div className="text-white bg-amber-500 flex items-center space-x-2 px-4 lg:px-6 py-2 lg:py-3 rounded-full font-semibold shadow-[0_8px_20px_rgba(245,158,11,0.4)] cursor-pointer hover:bg-amber-600 transition-colors">
+            <svg
+              width="20"
+              height="18"
+              viewBox="0 0 20 18"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M11 13L15 9M15 9L11 5M15 9H1M6 13V14C6 14.7956 6.31607 15.5587 6.87868 16.1213C7.44129 16.6839 8.20435 17 9 17H16C16.7956 17 17.5587 16.6839 18.1213 16.1213C18.6839 15.5587 19 14.7956 19 14V4C19 3.20435 18.6839 2.44129 18.1213 1.87868C17.5587 1.31607 16.7956 1 16 1H9C8.20435 1 7.44129 1.31607 6.87868 1.87868C6.31607 2.44129 6 3.20435 6 4V5"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>Login</span>
+          </div>
+        </div>
+
+        {/* Mobile menu button */}
+        <div className='md:hidden flex items-center'>
+          <button
+            onClick={toggleMenu}
+            className="text-gray-500 focus:outline-none"
+          >
+            {isMenuOpen ? (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg z-50 p-4">
+            <div className="flex flex-col space-y-4">
+              <div className="text-green-800/50 font-semibold py-2 border-b border-gray-200">
+                Home
+              </div>
+              <div className="text-gray-500 font-semibold py-2 border-b border-gray-200">
+                About
+              </div>
+              <div className="text-gray-500 font-semibold py-2 border-b border-gray-200 flex items-center">
+                <img
+                  src="https://i.postimg.cc/Z5YrhP8h/lo.png"
+                  className='w-5 mr-2'
+                  alt="Course icon"
+                />
+                Courses
+              </div>
+              <div className="text-gray-500 font-semibold py-2 border-b border-gray-200">
+                Contact
+              </div>
+
+              <div className="flex items-center justify-between pt-4">
+                <div className='flex items-center space-x-4'>
+                  <svg
+                    className='cursor-pointer'
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M7.39687 14.7937C5.32954 14.7937 3.58009 14.0776 2.14851 12.6452C0.716928 11.2129 0.000759255 9.46344 6.02106e-07 7.39687C-0.000758051 5.3303 0.715411 3.58084 2.14851 2.14851C3.5816 0.716169 5.33106 0 7.39687 0C9.46268 0 11.2125 0.716169 12.6464 2.14851C14.0802 3.58084 14.796 5.3303 14.7937 7.39687C14.7937 8.23139 14.661 9.01849 14.3954 9.75818C14.1299 10.4979 13.7696 11.1522 13.3144 11.7212L19.6871 18.0939C19.8957 18.3025 20 18.568 20 18.8905C20 19.2129 19.8957 19.4784 19.6871 19.6871C19.4784 19.8957 19.2129 20 18.8905 20C18.568 20 18.3025 19.8957 18.0939 19.6871L11.7212 13.3144C11.1522 13.7696 10.4979 14.1299 9.75818 14.3954C9.01849 14.661 8.23139 14.7937 7.39687 14.7937ZM7.39687 12.5178C8.81935 12.5178 10.0286 12.0201 11.0248 11.0247C12.0209 10.0294 12.5185 8.8201 12.5178 7.39687C12.5170 5.97364 12.0193 4.76472 11.0248 3.77013C10.0302 2.77553 8.82086 2.27748 7.39687 2.27596C5.97288 2.27444 4.76396 2.7725 3.77013 3.77013C2.77629 4.76776 2.27824 5.97667 2.27596 7.39687C2.27368 8.81707 2.77174 10.0264 3.77013 11.0247C4.76852 12.0231 5.97743 12.5208 7.39687 12.5178Z"
+                      fill="#6E6E6E"
+                    />
+                  </svg>
+                  <img
+                    src="https://i.postimg.cc/VsjB5JrG/image.png"
+                    className='h-6 cursor-pointer'
+                    alt="User profile"
+                  />
+                  <div className='flex items-center space-x-1 cursor-pointer'>
+                    <span className='font-semibold text-gray-600'>EN</span>
+                    <svg
+                      width="14"
+                      height="8"
+                      viewBox="0 0 14 8"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M12.8533 0.000880374L13.9977 1.18961L7.76531 7.66935C7.66545 7.7738 7.54668 7.85671 7.41585 7.91331C7.28501 7.9699 7.14469 7.99907 7.00296 7.99913C6.86124 7.99918 6.7209 7.97013 6.59002 7.91364C6.45915 7.85715 6.34033 7.77434 6.24039 7.66997L0.000353723 1.19526L1.14391 0.00672794L7.00069 6.0837L12.8533 0.000880374Z"
+                        fill="#6E6E6E"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div className="text-white bg-amber-500 flex items-center space-x-2 px-4 py-2 rounded-full font-semibold shadow-[0_8px_20px_rgba(245,158,11,0.4)] cursor-pointer">
+                  <svg
+                    width="20"
+                    height="18"
+                    viewBox="0 0 20 18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M11 13L15 9M15 9L11 5M15 9H1M6 13V14C6 14.7956 6.31607 15.5587 6.87868 16.1213C7.44129 16.6839 8.20435 17 9 17H16C16.7956 17 17.5587 16.6839 18.1213 16.1213C18.6839 15.5587 19 14.7956 19 14V4C19 3.20435 18.6839 2.44129 18.1213 1.87868C17.5587 1.31607 16.7956 1 16 1H9C8.20435 1 7.44129 1.31607 6.87868 1.87868C6.31607 2.44129 6 3.20435 6 4V5"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span>Login</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <div className='px-4 sm:px-6 md:px-8 lg:px-12 xl:px-30 relative'>
+        {/* Decorative background elements - hidden on mobile */}
+        <img
+          src="https://i.postimg.cc/HLqqKkfF/line.png"
+          className='absolute left-0 top-4 w-20 md:w-30 lg:w-40 xl:w-50 hidden lg:block'
+          alt="Decorative line"
+        />
+        <img
+          src="https://i.postimg.cc/X7BtB78r/ll-removebg-preview.png"
+          className='absolute right-0 w-20 md:w-30 lg:w-40 xl:w-45 top-15 md:top-25 lg:top-35 hidden md:block'
+          alt="Decorative element"
+        />
+
+        {/* Hero Content */}
+        <div className='flex flex-col lg:flex-row justify-around items-center gap-8 lg:gap-4 xl:gap-8 pt-6 md:pt-10 lg:pt-16'>
+          {/* Left hero - text content */}
+          <div className='left w-full lg:w-[45%] xl:w-[40%] relative flex flex-col items-center lg:items-start'>
+            <div className='relative w-full flex flex-col items-center lg:items-start'>
+              <div className="text-left">
+                <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-6xl lg:text-7xl leading-[1.1] sm:leading-[1.2] md:leading-[1.2] font-bold">
+                  <span className="text-[#d4a018] block">Take your time</span>
+                  <span className="text-black block mt-1 sm:mt-2">and learn from</span>
+                  <span className="text-black flex items-end mt-1 sm:mt-2">
+                    <span className="mr-2">anywhere</span>
+                    <img
+                      src="https://i.postimg.cc/XYw7xtGj/kk.png"
+                      className='w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24'
+                      alt="Decoration"
+                    />
+                  </span>
+                </h1>
+              </div>
+            </div>
+            <p className='text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 font-medium mt-4 md:mt-6 lg:mt-8 max-w-md'>
+              A learning system based on formalised teaching but with the help of electronic resources.
+            </p>
+            <div className="text-white w-fit mt-6 md:mt-8 bg-[#1eb1bf] flex items-center space-x-2 p-3 md:p-4 px-5 md:px-6 rounded-full font-semibold shadow-[0_8px_30px_rgba(30,177,191,0.4)] hover:bg-[#189ba8] transition-colors cursor-pointer">
+              <span className="text-sm md:text-base">LEARN NOW &gt;</span>
+            </div>
+          </div>
+
+          {/* Right hero - image with floating elements */}
+          <div className='relative w-full lg:w-[50%] xl:w-[45%] aspect-square max-w-md lg:max-w-none bg-[url("https://i.postimg.cc/3xFQkvb1/image.png")] bg-center bg-cover rounded-lg overflow-hidden'>
+            {/* Batch icon */}
+            <div className='absolute top-20 lg:top-40 left-4 sm:left-8 md:left-16 lg:left-22 flex justify-center items-center rounded-full p-2 w-8 h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-15 lg:h-15 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)]'>
+              <img
+                src="https://i.postimg.cc/pVgpgv2D/batch.png"
+                className='w-5 sm:w-6 md:w-7'
+                alt="Batch icon"
+              />
+            </div>
+
+            {/* Cap icon */}
+            <div className='absolute bottom-10 right-8 sm:right-12 md:right-20 lg:right-35 flex justify-center items-center rounded-full p-2 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-16 lg:h-16 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)]'>
+              <img
+                src="https://i.postimg.cc/V6mF9thk/cap.png"
+                className='w-6 sm:w-7 md:w-8 lg:w-10'
+                alt="Graduation cap"
+              />
+            </div>
+
+            {/* Free courses counter */}
+            <div className='absolute top-6 sm:top-8 md:top-12 lg:top-25 right-2 sm:right-4 md:right-6 lg:right-0 w-40 sm:w-48 md:w-52 bg-white flex space-x-2 sm:space-x-3 md:space-x-4 shadow-[0_4px_20px_rgba(0,0,0,0.15)] p-3 sm:p-4 rounded-xl md:rounded-2xl'>
+              <div className='flex justify-center items-center bg-amber-500 p-2 sm:p-3 md:p-4 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl'>
+                <img
+                  src="https://i.postimg.cc/vBntdz6h/image.png"
+                  className='w-5 sm:w-6 md:w-7 lg:w-8'
+                  alt="Courses icon"
+                />
+              </div>
+              <div className='flex flex-col gap-0 sm:gap-1'>
+                <span className='text-lg sm:text-xl md:text-2xl text-[#1eb1bf] font-bold'>250k</span>
+                <span className='text-xs sm:text-sm md:text-base font-semibold text-gray-500'>Free Courses</span>
+              </div>
+            </div>
+
+            {/* Active students counter */}
+            <div className='absolute bottom-4 sm:bottom-6 md:bottom-10 lg:bottom-16 left-4 sm:left-6 w-40 sm:w-45 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] rounded-xl md:rounded-2xl p-4 sm:p-5'>
+              <div className='absolute -top-4 -left-4 sm:-top-5 sm:-left-5 md:-top-6 md:-left-6 flex justify-center items-center bg-amber-500 p-2 sm:p-3 md:p-4 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full'>
+                <img
+                  src="https://i.postimg.cc/9Qf09Q1H/image.png"
+                  className='w-5 sm:w-6 md:w-7'
+                  alt="Students icon"
+                />
+              </div>
+              <div className='flex flex-col gap-0 sm:gap-1'>
+                <span className='text-lg sm:text-xl md:text-2xl text-[#1eb1bf] font-bold'>150k</span>
+                <span className='text-xs sm:text-sm md:text-base font-semibold text-gray-500'>Active Students</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Landing

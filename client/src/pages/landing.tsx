@@ -8,90 +8,99 @@ export default function Landing() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="pt-24 pb-20 hero-gradient">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                  Your Complete <span className="gradient-text">Student Resource Hub</span>
+      <div className='px-4 sm:px-6 md:px-8 lg:px-12 xl:px-30 relative pt-24'>
+        {/* Decorative background elements - hidden on mobile */}
+        <img
+          src="https://i.postimg.cc/HLqqKkfF/line.png"
+          className='absolute left-0 top-4 w-20 md:w-30 lg:w-40 xl:w-50 hidden lg:block'
+          alt="Decorative line"
+        />
+        <img
+          src="https://i.postimg.cc/X7BtB78r/ll-removebg-preview.png"
+          className='absolute right-0 w-20 md:w-30 lg:w-40 xl:w-45 top-15 md:top-25 lg:top-35 hidden md:block'
+          alt="Decorative element"
+        />
+
+        {/* Hero Content */}
+        <div className='flex flex-col lg:flex-row justify-around items-center gap-8 lg:gap-4 xl:gap-8 pt-6 md:pt-10 lg:pt-16'>
+          {/* Left hero - text content */}
+          <div className='left w-full lg:w-[45%] xl:w-[40%] relative flex flex-col items-center lg:items-start'>
+            <div className='relative w-full flex flex-col items-center lg:items-start'>
+              <div className="text-left">
+                <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-6xl lg:text-7xl leading-[1.1] sm:leading-[1.2] md:leading-[1.2] font-bold">
+                  <span className="text-[#d4a018] block">Take your time</span>
+                  <span className="text-black block mt-1 sm:mt-2">and learn from</span>
+                  <span className="text-black flex items-end mt-1 sm:mt-2">
+                    <span className="mr-2">anywhere</span>
+                    <img
+                      src="https://i.postimg.cc/XYw7xtGj/kk.png"
+                      className='w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24'
+                      alt="Decoration"
+                    />
+                  </span>
                 </h1>
-                <p className="text-xl text-muted-foreground leading-relaxed">
-                  Connect with academic resources, find the best campus services, share knowledge, and build your student community. Everything you need in one unified platform.
-                </p>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg"
-                  className="bg-gradient-to-r from-primary to-accent text-primary-foreground px-8 py-4 rounded-xl font-semibold hover:shadow-lg transition-all transform hover:scale-105"
-                  onClick={() => window.location.href = "/signin"}
-                  data-testid="button-start-journey"
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  className="border border-border text-foreground px-8 py-4 rounded-xl font-semibold hover:bg-muted transition-colors"
-                  onClick={() => window.location.href = "/signin"}
-                  data-testid="button-list-services"
-                >
-                  List Your Services
-                </Button>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="flex -space-x-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-background"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 border-2 border-background"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-background"></div>
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-background"></div>
-                </div>
-                <span className="text-muted-foreground" data-testid="text-user-count">Join 10,000+ students already using StudyConnect</span>
               </div>
             </div>
-            
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
-                alt="Students collaborating in modern study environment" 
-                className="rounded-2xl shadow-2xl animate-float" 
-                data-testid="img-hero"
+            <p className='text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 font-medium mt-4 md:mt-6 lg:mt-8 max-w-md'>
+              A learning system based on formalised teaching but with the help of electronic resources.
+            </p>
+            <div className="text-white w-fit mt-6 md:mt-8 bg-[#1eb1bf] flex items-center space-x-2 p-3 md:p-4 px-5 md:px-6 rounded-full font-semibold shadow-[0_8px_30px_rgba(30,177,191,0.4)] hover:bg-[#189ba8] transition-colors cursor-pointer" onClick={() => window.location.href = "/signin"} data-testid="button-learn-now">
+              <span className="text-sm md:text-base">LEARN NOW &gt;</span>
+            </div>
+          </div>
+
+          {/* Right hero - image with floating elements */}
+          <div className='relative w-full lg:w-[50%] xl:w-[45%] aspect-square max-w-md lg:max-w-none bg-[url("https://i.postimg.cc/3xFQkvb1/image.png")] bg-center bg-cover rounded-lg overflow-hidden'>
+            {/* Batch icon */}
+            <div className='absolute top-20 lg:top-40 left-4 sm:left-8 md:left-16 lg:left-22 flex justify-center items-center rounded-full p-2 w-8 h-8 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-15 lg:h-15 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)]'>
+              <img
+                src="https://i.postimg.cc/pVgpgv2D/batch.png"
+                className='w-5 sm:w-6 md:w-7'
+                alt="Batch icon"
               />
-              
-              <div className="absolute -top-4 -left-4 glass-card rounded-xl p-4 animate-float" style={{animationDelay: "1s"}}>
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm" data-testid="text-notes-count">245 Notes</p>
-                    <p className="text-xs text-muted-foreground">Computer Science</p>
-                  </div>
-                </div>
+            </div>
+
+            {/* Cap icon */}
+            <div className='absolute bottom-10 right-8 sm:right-12 md:right-20 lg:right-35 flex justify-center items-center rounded-full p-2 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-16 lg:h-16 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)]'>
+              <img
+                src="https://i.postimg.cc/V6mF9thk/cap.png"
+                className='w-6 sm:w-7 md:w-8 lg:w-10'
+                alt="Graduation cap"
+              />
+            </div>
+
+            {/* Free courses counter */}
+            <div className='absolute top-6 sm:top-8 md:top-12 lg:top-25 right-2 sm:right-4 md:right-6 lg:right-0 w-40 sm:w-48 md:w-52 bg-white flex space-x-2 sm:space-x-3 md:space-x-4 shadow-[0_4px_20px_rgba(0,0,0,0.15)] p-3 sm:p-4 rounded-xl md:rounded-2xl'>
+              <div className='flex justify-center items-center bg-amber-500 p-2 sm:p-3 md:p-4 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-lg md:rounded-xl'>
+                <img
+                  src="https://i.postimg.cc/vBntdz6h/image.png"
+                  className='w-5 sm:w-6 md:w-7 lg:w-8'
+                  alt="Courses icon"
+                />
               </div>
-              
-              <div className="absolute -bottom-4 -right-4 glass-card rounded-xl p-4 animate-float" style={{animationDelay: "2s"}}>
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-secondary rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-secondary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm" data-testid="text-vendors-count">50+ Vendors</p>
-                    <p className="text-xs text-muted-foreground">Near Campus</p>
-                  </div>
-                </div>
+              <div className='flex flex-col gap-0 sm:gap-1'>
+                <span className='text-lg sm:text-xl md:text-2xl text-[#1eb1bf] font-bold' data-testid="text-free-courses">250k</span>
+                <span className='text-xs sm:text-sm md:text-base font-semibold text-gray-500'>Free Courses</span>
+              </div>
+            </div>
+
+            {/* Active students counter */}
+            <div className='absolute bottom-4 sm:bottom-6 md:bottom-10 lg:bottom-16 left-4 sm:left-6 w-40 sm:w-45 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] rounded-xl md:rounded-2xl p-4 sm:p-5'>
+              <div className='absolute -top-4 -left-4 sm:-top-5 sm:-left-5 md:-top-6 md:-left-6 flex justify-center items-center bg-amber-500 p-2 sm:p-3 md:p-4 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full'>
+                <img
+                  src="https://i.postimg.cc/9Qf09Q1H/image.png"
+                  className='w-5 sm:w-6 md:w-7'
+                  alt="Students icon"
+                />
+              </div>
+              <div className='flex flex-col gap-0 sm:gap-1'>
+                <span className='text-lg sm:text-xl md:text-2xl text-[#1eb1bf] font-bold' data-testid="text-active-students">150k</span>
+                <span className='text-xs sm:text-sm md:text-base font-semibold text-gray-500'>Active Students</span>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Problem Section */}
       <section className="py-20 bg-muted/30">
