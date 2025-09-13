@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { motion } from "framer-motion";
 import DottedMap from "dotted-map";
-import { useTheme } from "next-themes";
 
 interface MapProps {
   dots?: Array<{
@@ -18,20 +17,29 @@ export function WorldMap({
   lineColor = "#0ea5e9",
 }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const map = new DottedMap({ height: 100, grid: "diagonal" });
-
-  const { theme } = useTheme();
+  
+  // Create a focused map for India region
+  const map = new DottedMap({ 
+    height: 60, 
+    grid: "diagonal"
+  });
 
   const svgMap = map.getSVG({
-    radius: 0.22,
-    color: theme === "dark" ? "#FFFFFF40" : "#00000040",
-    shape: "circle",
-    backgroundColor: theme === "dark" ? "black" : "white",
+    radius: 0.3,
+    color: "#00000040",
+    shape: "circle", 
+    backgroundColor: "white",
   });
 
   const projectPoint = (lat: number, lng: number) => {
-    const x = (lng + 180) * (800 / 360);
-    const y = (90 - lat) * (400 / 180);
+    // India bounds: Lat 8°N to 37°N, Lng 68°E to 97°E
+    const indiaLatMin = 8;
+    const indiaLatMax = 37;
+    const indiaLngMin = 68;
+    const indiaLngMax = 97;
+    
+    const x = ((lng - indiaLngMin) / (indiaLngMax - indiaLngMin)) * 800;
+    const y = ((indiaLatMax - lat) / (indiaLatMax - indiaLatMin)) * 400;
     return { x, y };
   };
 
