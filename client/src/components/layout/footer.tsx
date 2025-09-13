@@ -43,10 +43,10 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">For Students</h3>
             <ul className="space-y-3 text-muted-foreground">
-              <li><Link href="/browse"><a className="hover:text-foreground transition-colors" data-testid="footer-link-browse">Browse Notes</a></Link></li>
-              <li><Link href="/upload"><a className="hover:text-foreground transition-colors" data-testid="footer-link-upload">Upload Content</a></Link></li>
+              <li><Link href="/browse" className="hover:text-foreground transition-colors" data-testid="footer-link-browse">Browse Notes</Link></li>
+              <li><Link href="/upload" className="hover:text-foreground transition-colors" data-testid="footer-link-upload">Upload Content</Link></li>
               <li><a href="#" className="hover:text-foreground transition-colors" data-testid="footer-link-study-groups">Study Groups</a></li>
-              <li><Link href="/vendors"><a className="hover:text-foreground transition-colors" data-testid="footer-link-campus-resources">Campus Resources</a></Link></li>
+              <li><Link href="/vendors" className="hover:text-foreground transition-colors" data-testid="footer-link-campus-resources">Campus Resources</Link></li>
             </ul>
           </div>
           
