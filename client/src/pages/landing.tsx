@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Search, FileText, Home, Users, GraduationCap, MapPin, Star, Bookmark, Phone, Calendar, BookOpen } from "lucide-react";
-import { IndiaMap } from "@/components/ui/india-map";
+import { WorldMap } from "@/components/ui/world-map";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import HeroSection from "@/components/hero/HeroSection";
 
@@ -136,6 +136,14 @@ export default function Landing() {
                 🌍 MAP VIEW
               </h3>
               
+              {/* Interactive World Map */}
+              <div className="mb-6">
+                <WorldMap
+                  dots={indiaConnections}
+                  lineColor="#1eb1bf"
+                />
+              </div>
+
               {/* City Statistics */}
               <div className="space-y-3 mb-6">
                 {[
