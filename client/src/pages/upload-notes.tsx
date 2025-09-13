@@ -42,12 +42,20 @@ const uploadSchema = z.object({
 
 type UploadFormData = z.infer<typeof uploadSchema>;
 
+interface FileWithPreview extends File {
+  preview?: string;
+  uploadProgress?: number;
+  uploadStatus?: 'pending' | 'uploading' | 'success' | 'error';
+  uploadError?: string;
+  id?: string;
+}
+
 export default function UploadNotes() {
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
 
   const form = useForm<UploadFormData>({
     resolver: zodResolver(uploadSchema),
@@ -70,8 +78,28 @@ export default function UploadNotes() {
     },
   });
 
-  const uploadMutation = useMutation({
-    mutationFn: async (data: UploadFormData) => {
+  // Update file progress
+  const updateFileProgress = (fileId: string, progress: number) => {
+    setSelectedFiles(prevFiles => 
+      prevFiles.map(file => 
+        file.id === fileId ? { ...file, uploadProgress: progress } : file
+      )
+    );
+  };
+
+  // Update file status
+  const updateFileStatus = (fileId: string, status: 'pending' | 'uploading' | 'success' | 'error', error?: string) => {
+    setSelectedFiles(prevFiles => 
+      prevFiles.map(file => 
+        file.id === fileId ? { ...file, uploadStatus: status, uploadError: error } : file
+      )
+    );
+  };
+
+  // Upload individual file with progress tracking
+  const uploadSingleFile = (file: FileWithPreview, data: UploadFormData): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
       const formData = new FormData();
       
       // Add form fields
@@ -81,23 +109,81 @@ export default function UploadNotes() {
         }
       });
 
-      // Add files
-      selectedFiles.forEach(file => {
-        formData.append('files', file);
+      // Add single file
+      formData.append('files', file);
+      formData.append('fileId', file.id || '');
+
+      // Update status to uploading
+      updateFileStatus(file.id!, 'uploading');
+
+      // Track upload progress
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          updateFileProgress(file.id!, progress);
+        }
       });
 
-      const response = await fetch('/api/notes', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
+      // Handle completion
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const result = JSON.parse(xhr.responseText);
+            updateFileStatus(file.id!, 'success');
+            resolve(result);
+          } catch {
+            updateFileStatus(file.id!, 'success');
+            resolve(xhr.responseText);
+          }
+        } else {
+          updateFileStatus(file.id!, 'error', `Upload failed: ${xhr.status}`);
+          reject(new Error(`${xhr.status}: ${xhr.responseText}`));
+        }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`${response.status}: ${errorText}`);
+      // Handle network errors
+      xhr.addEventListener('error', () => {
+        updateFileStatus(file.id!, 'error', 'Network error occurred');
+        reject(new Error('Network error occurred during upload'));
+      });
+
+      // Handle timeout
+      xhr.addEventListener('timeout', () => {
+        updateFileStatus(file.id!, 'error', 'Upload timed out');
+        reject(new Error('Upload timed out. Please try again.'));
+      });
+
+      xhr.open('POST', '/api/notes');
+      xhr.withCredentials = true;
+      xhr.timeout = 300000; // 5 minutes timeout
+      xhr.send(formData);
+    });
+  };
+
+  // Upload all files individually
+  const uploadAllFiles = async (data: UploadFormData) => {
+    const results = [];
+    const errors = [];
+    
+    for (const file of selectedFiles) {
+      try {
+        const result = await uploadSingleFile(file, data);
+        results.push(result);
+      } catch (error) {
+        errors.push({ file: file.name, error });
       }
+    }
+    
+    if (errors.length > 0) {
+      throw new Error(`Failed to upload ${errors.length} file(s): ${errors.map(e => e.file).join(', ')}`);
+    }
+    
+    return results[0]; // Return first result for navigation
+  };
 
-      return response.json();
+  const uploadMutation = useMutation({
+    mutationFn: async (data: UploadFormData) => {
+      return uploadAllFiles(data);
     },
     onSuccess: (data) => {
       toast({
@@ -204,8 +290,10 @@ export default function UploadNotes() {
                   </div>
                   
                   <UploadZone 
+                    files={selectedFiles}
                     onFilesChange={setSelectedFiles}
                     maxFiles={10}
+                    isUploading={uploadMutation.isPending}
                   />
                 </CardContent>
               </Card>
