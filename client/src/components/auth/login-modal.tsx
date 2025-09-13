@@ -31,7 +31,8 @@ interface LoginModalProps {
 
 export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signIn } = useAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { signIn, signInWithOAuth } = useAuth();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -44,12 +45,13 @@ export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginM
 
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
+    setAuthError(null);
+    
     try {
       const { error } = await signIn(data.email, data.password);
       
       if (error) {
-        console.error("Error logging in:", error);
-        // You would show this error to the user in a real app
+        setAuthError(error.message || "Failed to sign in. Please check your credentials.");
         return;
       }
       
@@ -57,9 +59,21 @@ export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginM
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error("Error logging in:", error);
+      setAuthError("An unexpected error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+    setAuthError(null);
+    try {
+      const { error } = await signInWithOAuth(provider);
+      if (error) {
+        setAuthError(error.message || `Failed to sign in with ${provider}`);
+      }
+    } catch (error) {
+      setAuthError(`An error occurred signing in with ${provider}`);
     }
   };
 
@@ -80,6 +94,12 @@ export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginM
             <X className="h-4 w-4" />
           </Button>
         </DialogHeader>
+
+        {authError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4" data-testid="error-message">
+            {authError}
+          </div>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -150,6 +170,38 @@ export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginM
             >
               {isSubmitting ? "Signing In..." : "Sign In"}
             </Button>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">OR</span>
+              </div>
+            </div>
+
+            {/* Social Login */}
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleSocialLogin('google')}
+                data-testid="button-google-login"
+              >
+                🔵 Google
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => handleSocialLogin('facebook')}
+                data-testid="button-facebook-login"
+              >
+                📘 Facebook
+              </Button>
+            </div>
 
             <div className="text-center">
               <Button

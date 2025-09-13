@@ -23,6 +23,7 @@ import StudentDashboard from "@/pages/student-dashboard";
 import Discovery from "@/pages/discovery";
 import MapView from "@/pages/map-view";
 import AuthDemo from "@/pages/auth-demo";
+import AuthCallback from "@/pages/auth/callback";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -33,6 +34,7 @@ function Router() {
         <>
           <Route path="/" component={Landing} />
           <Route path="/auth-demo" component={AuthDemo} />
+          <Route path="/auth/callback" component={AuthCallback} />
         </>
       ) : (
         <>

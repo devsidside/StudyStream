@@ -6,10 +6,11 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
-  signUp: (email: string, password: string) => Promise<{ error?: any }>
+  signUp: (email: string, password: string, metadata?: any) => Promise<{ error?: any }>
   signIn: (email: string, password: string) => Promise<{ error?: any }>
   signOut: () => Promise<void>
   resendConfirmation: (email: string) => Promise<{ error?: any }>
+  signInWithOAuth: (provider: 'google' | 'facebook') => Promise<{ error?: any }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -39,10 +40,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, metadata?: any) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: metadata || {}
+      }
     })
     return { error }
   }
@@ -67,6 +72,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
+  const signInWithOAuth = async (provider: 'google' | 'facebook') => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    return { error }
+  }
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -76,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signIn,
       signOut,
       resendConfirmation,
+      signInWithOAuth,
     }}>
       {children}
     </AuthContext.Provider>
