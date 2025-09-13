@@ -13,6 +13,15 @@ import BrowseNotes from "@/pages/browse-notes";
 import NoteDetail from "@/pages/note-detail";
 import Vendors from "@/pages/vendors";
 import Admin from "@/pages/admin";
+import StudyGroups from "@/pages/study-groups";
+import CampusResources from "@/pages/campus-resources";
+import ListService from "@/pages/vendors/list-service";
+import VendorDashboard from "@/pages/vendors/dashboard";
+import PricingPlans from "@/pages/vendors/pricing";
+import SuccessStories from "@/pages/vendors/success-stories";
+import StudentDashboard from "@/pages/student-dashboard";
+import Discovery from "@/pages/discovery";
+import MapView from "@/pages/map-view";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -30,6 +39,15 @@ function Router() {
           <Route path="/notes/:id" component={NoteDetail} />
           <Route path="/vendors" component={Vendors} />
           <Route path="/admin" component={Admin} />
+          <Route path="/study-groups" component={StudyGroups} />
+          <Route path="/campus-resources" component={CampusResources} />
+          <Route path="/vendors/list-service" component={ListService} />
+          <Route path="/vendors/dashboard" component={VendorDashboard} />
+          <Route path="/vendors/pricing" component={PricingPlans} />
+          <Route path="/vendors/success-stories" component={SuccessStories} />
+          <Route path="/dashboard" component={StudentDashboard} />
+          <Route path="/discovery" component={Discovery} />
+          <Route path="/map" component={MapView} />
         </>
       )}
       <Route component={NotFound} />

@@ -32,26 +32,83 @@ export default function Navbar() {
             
             {isAuthenticated && (
               <div className="hidden md:flex space-x-6">
-                <Link href="/browse">
-                  <a className={`text-muted-foreground hover:text-foreground transition-colors ${location === '/browse' ? 'text-foreground font-medium' : ''}`} data-testid="link-browse">
-                    Browse
-                  </a>
-                </Link>
-                <Link href="/notes">
-                  <a className={`text-muted-foreground hover:text-foreground transition-colors ${location === '/notes' ? 'text-foreground font-medium' : ''}`} data-testid="link-notes">
-                    Notes
-                  </a>
-                </Link>
-                <Link href="/upload">
-                  <a className={`text-muted-foreground hover:text-foreground transition-colors ${location === '/upload' ? 'text-foreground font-medium' : ''}`} data-testid="link-upload">
-                    Upload
-                  </a>
-                </Link>
-                <Link href="/vendors">
-                  <a className={`text-muted-foreground hover:text-foreground transition-colors ${location === '/vendors' ? 'text-foreground font-medium' : ''}`} data-testid="link-vendors">
-                    Services
-                  </a>
-                </Link>
+                {/* For Students Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-students">
+                      For Students
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48" align="start">
+                    <Link href="/dashboard">
+                      <DropdownMenuItem data-testid="link-student-dashboard">
+                        Dashboard
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/discovery">
+                      <DropdownMenuItem data-testid="link-discovery">
+                        Discover Services
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/map">
+                      <DropdownMenuItem data-testid="link-map-view">
+                        Map View
+                      </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuSeparator />
+                    <Link href="/browse">
+                      <DropdownMenuItem data-testid="link-browse-notes">
+                        Browse Notes
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/upload">
+                      <DropdownMenuItem data-testid="link-upload-content">
+                        Upload Content
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/study-groups">
+                      <DropdownMenuItem data-testid="link-study-groups">
+                        Study Groups
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/campus-resources">
+                      <DropdownMenuItem data-testid="link-campus-resources">
+                        Campus Resources
+                      </DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* For Vendors Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-vendors">
+                      For Vendors
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48" align="start">
+                    <Link href="/vendors/list-service">
+                      <DropdownMenuItem data-testid="link-list-service">
+                        List Your Service
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/vendors/dashboard">
+                      <DropdownMenuItem data-testid="link-vendor-dashboard">
+                        Vendor Dashboard
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/vendors/pricing">
+                      <DropdownMenuItem data-testid="link-pricing-plans">
+                        Pricing Plans
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/vendors/success-stories">
+                      <DropdownMenuItem data-testid="link-success-stories">
+                        Success Stories
+                      </DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
           </div>
