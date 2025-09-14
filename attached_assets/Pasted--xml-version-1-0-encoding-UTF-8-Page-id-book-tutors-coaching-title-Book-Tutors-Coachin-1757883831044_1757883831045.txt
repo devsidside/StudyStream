@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Page id="book-tutors-coaching" title="Book Tutors & Coaching">
+    <!-- Header Navigation -->
+    <Header>
+        <Navigation>
+            <Logo>🎓 StudyConnect</Logo>
+            <NavItems>
+                <NavItem href="/how-it-works">How It Works</NavItem>
+                <NavItem href="/students" active="true" dropdown="true">For Students</NavItem>
+                <NavItem href="/vendors" dropdown="true">For Vendors</NavItem>
+                <NavItem href="/pricing">Pricing</NavItem>
+            </NavItems>
+            <AuthButtons>
+                <Button type="secondary" href="/login">Login</Button>
+                <Button type="primary" href="/signup">Sign Up Free</Button>
+            </AuthButtons>
+        </Navigation>
+    </Header>
+
+    <!-- Hero Section -->
+    <HeroSection>
+        <Title>👨‍🏫 FIND THE PERFECT TUTOR FOR YOU</Title>
+        <Subtitle>Expert tutors • Verified profiles • Instant booking</Subtitle>
+        
+        <TutorFinder>
+            <SearchBar>
+                <Input placeholder="Mathematics" icon="📚"/>
+                <Dropdown placeholder="JEE Advanced" icon="🎓"/>
+                <Input placeholder="₹500-1000" icon="💰"/>
+                <Dropdown placeholder="Online" icon="📍"/>
+                <Button type="primary">🔍 Search</Button>
+            </SearchBar>
+            <PopularSearches>
+                <Suggestion>Physics Olympiad</Suggestion>
+                <Suggestion>NEET Biology</Suggestion>
+                <Suggestion>CS Interview Prep</Suggestion>
+            </PopularSearches>
+        </TutorFinder>
+
+        <TrendingSubjects>
+            <Subject>Math</Subject>
+            <Subject>Physics</Subject>
+            <Subject>Chemistry</Subject>
+            <Subject>CS</Subject>
+            <Subject>English</Subject>
+            <Subject>Economics</Subject>
+        </TrendingSubjects>
+    </HeroSection>
+
+    <!-- Tutor Categories -->
+    <TutorCategories>
+        <Title>TUTOR CATEGORIES</Title>
+        <CategoryGrid>
+            <Category>
+                <Icon>🎓</Icon>
+                <Title>EXAM PREP</Title>
+                <Description>JEE, NEET, GATE</Description>
+                <Count>2,847 tutors</Count>
+            </Category>
+            
+            <Category>
+                <Icon>💻</Icon>
+                <Title>TECH/CS</Title>
+                <Description>Programming, DS</Description>
+                <Count>1,567 tutors</Count>
+            </Category>
+
+            <Category>
+                <Icon>🌍</Icon>
+                <Title>LANGUAGES</Title>
+                <Description>English, German</Description>
+                <Count>834 tutors</Count>
+            </Category>
+
+            <Category>
+                <Icon>🎨</Icon>
+                <Title>SKILLS</Title>
+                <Description>Music, Art</Description>
+                <Count>445 tutors</Count>
+            </Category>
+        </CategoryGrid>
+    </TutorCategories>
+
+    <!-- Main Content -->
+    <MainContent>
+        <!-- Sidebar Filters -->
+        <Sidebar>
+            <FilterGroup title="📚 SUBJECT">
+                <Checkbox checked="true">Math</Checkbox>
+                <Checkbox>Physics</Checkbox>
+                <Checkbox>Chemistry</Checkbox>
+                <Checkbox>Biology</Checkbox>
+            </FilterGroup>
+
+            <FilterGroup title="💰 PRICE/HR">
+                <Checkbox>&lt;₹300</Checkbox>
+                <Checkbox checked="true">₹300-600</Checkbox>
+                <Checkbox checked="true">₹600-1000</Checkbox>
+                <Checkbox>&gt;₹1000</Checkbox>
+            </FilterGroup>
+
+            <FilterGroup title="📍 MODE">
+                <Checkbox checked="true">Online</Checkbox>
+                <Checkbox checked="true">In-person</Checkbox>
+                <Checkbox>Both</Checkbox>
+            </FilterGroup>
+
+            <FilterGroup title="⏰ TIME">
+                <Checkbox checked="true">Morning</Checkbox>
+                <Checkbox checked="true">Evening</Checkbox>
+                <Checkbox>Night</Checkbox>
+                <Checkbox>Weekend</Checkbox>
+            </FilterGroup>
+
+            <FilterGroup title="⭐ RATING">
+                <Checkbox checked="true">4.8+ ⭐</Checkbox>
+                <Checkbox checked="true">4.5+ ⭐</Checkbox>
+                <Checkbox>4.0+ ⭐</Checkbox>
+            </FilterGroup>
+
+            <FilterGroup title="🎯 EXAM">
+                <Checkbox checked="true">JEE</Checkbox>
+                <Checkbox checked="true">NEET</Checkbox>
+                <Checkbox>GATE</Checkbox>
+                <Checkbox>Boards</Checkbox>
+            </FilterGroup>
+
+            <FilterGroup title="🏷️ SPECIAL">
+                <Checkbox checked="true">Female</Checkbox>
+                <Checkbox checked="true">IIT Grad</Checkbox>
+                <Checkbox>PhD</Checkbox>
+                <Checkbox>Ex-Faculty</Checkbox>
+            </FilterGroup>
+
+            <FilterActions>
+                <Button type="secondary">Reset All</Button>
+                <Button type="primary">Apply (23)</Button>
+            </FilterActions>
+        </Sidebar>
+
+        <!-- Results Area -->
+        <ResultsArea>
+            <ResultsHeader>
+                <Count>234 tutors available for Mathematics</Count>
+                <ViewToggle>
+                    <Button type="icon">🗓️ Calendar</Button>
+                </ViewToggle>
+                <SortBy>
+                    <Dropdown selected="Rating">Sort: Rating ▼</Dropdown>
+                </SortBy>
+            </ResultsHeader>
+
+            <!-- Top Rated Tutor -->
+            <TutorCard featured="true">
+                <Badge>🏆 TOP RATED TUTOR</Badge>
+                <ProfileSection>
+                    <ProfileImage src="/prof-rajesh-kumar.jpg"/>
+                    <ProfileInfo>
+                        <Name>Prof. Rajesh Kumar</Name>
+                        <Actions>
+                            <Button type="icon">❤️ Save</Button>
+                            <Button type="primary">📞 Contact</Button>
+                        </Actions>
+                    </ProfileInfo>
+                </ProfileSection>
+                
+                <Credentials>
+                    <Education>🎓 IIT Delhi PhD</Education>
+                    <Subject>Mathematics</Subject>
+                    <Experience>12+ years experience</Experience>
+                </Credentials>
+
+                <Performance>
+                    <Rating>⭐⭐⭐⭐⭐ 4.97 (847 reviews)</Rating>
+                    <Price>💰 ₹800/hr</Price>
+                    <Availability>🟢 Available now</Availability>
+                </Performance>
+
+                <Specialization>
+                    <Title>🎯 SPECIALIZES IN:</Title>
+                    <Skills>
+                        <Skill>JEE Advanced</Skill>
+                        <Skill>Olympiad</Skill>
+                        <Skill>Research</Skill>
+                    </Skills>
+                </Specialization>
+
+                <SuccessRate>
+                    <Text>📊 SUCCESS RATE: 95% students improved by 2+ grades</Text>
+                </SuccessRate>
+
+                <Testimonial>
+                    <Quote>"Explained complex calculus in the simplest way!"</Quote>
+                    <Author>- Arjun S., IIT Aspirant</Author>
+                </Testimonial>
+
+                <AvailableSlots>
+                    <Title>📅 AVAILABLE SLOTS:</Title>
+                    <Slots>
+                        <Slot>Today 4PM, 6PM</Slot>
+                        <Slot>Tomorrow 2PM, 8PM</Slot>
+                    </Slots>
+                </AvailableSlots>
+
+                <Actions>
+                    <Button type="primary">📚 View Profile</Button>
+                    <Button type="secondary">📅 Book Session</Button>
+                    <Button type="secondary">💬 Message</Button>
+                    <Button type="secondary">📹 Demo</Button>
+                </Actions>
+            </TutorCard>
+
+            <!-- Regular Tutor Cards -->
+            <TutorCard>
+                <ProfileSection>
+                    <ProfileImage src="/dr-priya-sharma.jpg"/>
+                    <ProfileInfo>
+                        <Name>Dr. Priya Sharma</Name>
+                        <Actions>
+                            <Button type="icon">❤️ Save</Button>
+                            <Button type="primary">📱 Message</Button>
+                        </Actions>
+                    </ProfileInfo>
+                </ProfileSection>
+                
+                <Credentials>
+                    <Education>🎓 NIT Trichy MS</Education>
+                    <Subject>Physics</Subject>
+                    <Experience>8+ years</Experience>
+                    <Gender>Female tutor</Gender>
+                </Credentials>
+
+                <Performance>
+                    <Rating>⭐⭐⭐⭐⭐ 4.94 (623 reviews)</Rating>
+                    <Price>💰 ₹650/hr</Price>
+                    <ResponseTime>🔄 Usually responds</ResponseTime>
+                </Performance>
+
+                <Specialization>
+                    <Title>🎯 SPECIALIZES IN:</Title>
+                    <Skills>
+                        <Skill>NEET Physics</Skill>
+                        <Skill>Conceptual clarity</Skill>
+                    </Skills>
+                </Specialization>
+
+                <Achievements>
+                    <Title>📊 ACHIEVEMENTS:</Title>
+                    <Achievement>200+ NEET qualifiers</Achievement>
+                    <Achievement>98% success rate</Achievement>
+                </Achievements>
+
+                <Testimonial>
+                    <Quote>"Made physics so interesting! Cleared all my doubts."</Quote>
+                    <Author>- Kavya M., NEET Aspirant</Author>
+                </Testimonial>
+
+                <NextAvailable>
+                    <Text>📅 NEXT AVAILABLE: Tomorrow 10AM • Free demo session</Text>
+                </NextAvailable>
+
+                <Actions>
+                    <Button type="primary">👩‍🔬 Lab Videos</Button>
+                    <Button type="secondary">📅 Book Demo</Button>
+                    <Button type="secondary">💬 Chat</Button>
+                    <Button type="secondary">📊 Success Rate</Button>
+                </Actions>
+            </TutorCard>
+
+            <TutorCard>
+                <ProfileSection>
+                    <ProfileImage src="/arpit-coding-mentor.jpg"/>
+                    <ProfileInfo>
+                        <Name>Arpit Coding Mentor</Name>
+                        <Actions>
+                            <Button type="primary instant="true">⚡ Instant Book</Button>
+                        </Actions>
+                    </ProfileInfo>
+                </ProfileSection>
+                
+                <Credentials>
+                    <Education>💻 Google SDE</Education>
+                    <Subject>Computer Science</Subject>
+                    <Specialty>Placement Expert</Specialty>
+                </Credentials>
+
+                <Performance>
+                    <Rating>⭐⭐⭐⭐⭐ 4.92 (445 reviews)</Rating>
+                    <Price>💰 ₹1200/hr</Price>
+                    <Focus>🎯 Interview Prep</Focus>
+                </Performance>
+
+                <Specialization>
+                    <Title>🎯 SPECIALIZES IN:</Title>
+                    <Skills>
+                        <Skill>DSA</Skill>
+                        <Skill>System Design</Skill>
+                        <Skill>Mock Interviews</Skill>
+                    </Skills>
+                </Specialization>
+
+                <PlacementRecord>
+                    <Title>📊 PLACED STUDENTS AT:</Title>
+                    <Companies>
+                        <Company>Google</Company>
+                        <Company>Microsoft</Company>
+                        <Company>Amazon</Company>
+                        <Company>Meta</Company>
+                    </Companies>
+                </PlacementRecord>
+
+                <Testimonial>
+                    <Quote>"Helped me crack Google interview! Amazing mentor!"</Quote>
+                    <Author>- Rohit K., Placed at Google</Author>
+                </Testimonial>
+
+                <BookingStatus>
+                    <Text>📅 PREMIUM SLOTS: This week fully booked • Next week open</Text>
+                </BookingStatus>
+
+                <Actions>
+                    <Button type="primary">💼 Interview Prep</Button>
+                    <Button type="secondary">📅 Book Premium</Button>
+                    <Button type="secondary">💬 Chat</Button>
+                    <Button type="secondary">🎬 Videos</Button>
+                </Actions>
+            </TutorCard>
+
+            <!-- Instant Matching -->
+            <InstantMatching>
+                <Title>📊 INSTANT MATCHING</Title>
+                <Description>Not finding the right tutor? Let our AI find matches!</Description>
+                <Actions>
+                    <Button type="primary">🤖 AI Tutor Match</Button>
+                    <Button type="secondary">📝 Post Requirement</Button>
+                    <Button type="secondary">🔔 Set Alert</Button>
+                </Actions>
+            </InstantMatching>
+        </ResultsArea>
+    </MainContent>
+
+    <!-- Success Guarantee -->
+    <GuaranteeSection>
+        <Title>🎯 TUTORING SUCCESS GUARANTEE</Title>
+        <Features>
+            <Feature>Free demo session</Feature>
+            <Feature>Money-back guarantee</Feature>
+            <Feature>24/7 support</Feature>
+            <Feature>Verified tutors only</Feature>
+        </Features>
+        <Actions>
+            <Button type="secondary">🛡️ Our Guarantee</Button>
+            <Button type="secondary">💰 Refund Policy</Button>
+            <Button type="secondary">📞 Student Support</Button>
+        </Actions>
+    </GuaranteeSection>
+
+    <!-- Footer -->
+    <Footer>
+        <FooterContent>
+            <Column>
+                <Title>🎓StudyConnect</Title>
+                <Description>India's #1 Student Platform</Description>
+                <Button>📱Download App</Button>
+            </Column>
+            <Column>
+                <Title>For Students</Title>
+                <Links>
+                    <Link>Browse Services</Link>
+                    <Link>Upload Notes</Link>
+                    <Link>Find Study Groups</Link>
+                    <Link>Mobile App</Link>
+                </Links>
+            </Column>
+            <Column>
+                <Title>For Vendors</Title>
+                <Links>
+                    <Link>List Your Service</Link>
+                    <Link>Vendor Dashboard</Link>
+                    <Link>Pricing Plans</Link>
+                    <Link>Support</Link>
+                </Links>
+            </Column>
+            <Column>
+                <Title>Company</Title>
+                <Links>
+                    <Link>About Us</Link>
+                    <Link>Careers</Link>
+                    <Link>Contact</Link>
+                    <Link>Privacy Policy</Link>
+                </Links>
+            </Column>
+        </FooterContent>
+        <Copyright>© 2024 StudyConnect. All rights reserved.</Copyright>
+    </Footer>
+</Page>
