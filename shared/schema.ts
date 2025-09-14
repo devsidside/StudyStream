@@ -11,6 +11,8 @@ import {
   varchar,
   decimal,
   serial,
+  time,
+  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -156,6 +158,53 @@ export const vendorCategoryEnum = pgEnum("vendor_category", [
   "shopping"
 ]);
 
+// Tutor specific enums
+export const tutorModeEnum = pgEnum("tutor_mode", [
+  "online",
+  "in-person", 
+  "both"
+]);
+
+export const tutorAvailabilityEnum = pgEnum("tutor_availability", [
+  "morning",
+  "evening",
+  "night",
+  "weekend"
+]);
+
+export const tutorSpecializationEnum = pgEnum("tutor_specialization", [
+  "jee-advanced",
+  "jee-main",
+  "neet",
+  "gate",
+  "boards",
+  "olympiad", 
+  "research",
+  "placement-prep",
+  "interview-prep",
+  "dsa",
+  "system-design"
+]);
+
+export const tutorQualificationEnum = pgEnum("tutor_qualification", [
+  "btech",
+  "mtech",
+  "phd",
+  "masters",
+  "bachelors",
+  "diploma"
+]);
+
+export const tutorInstitutionTypeEnum = pgEnum("tutor_institution_type", [
+  "iit",
+  "nit",
+  "iiit",
+  "bits",
+  "iisc",
+  "iim",
+  "other"
+]);
+
 // Accommodation specific enums
 export const accommodationTypeEnum = pgEnum("accommodation_type", [
   "pg",
@@ -252,8 +301,8 @@ export const accommodations = pgTable("accommodations", {
   foodIncluded: boolean("food_included").default(false),
   mealsPerDay: integer("meals_per_day"),
   wifiSpeed: varchar("wifi_speed"),
-  checkInTime: varchar("check_in_time"),
-  checkOutTime: varchar("check_out_time"),
+  checkInTime: time("check_in_time"),
+  checkOutTime: time("check_out_time"),
   securityDeposit: decimal("security_deposit", { precision: 10, scale: 2 }),
   isPremium: boolean("is_premium").default(false),
   isFeatured: boolean("is_featured").default(false),
@@ -306,7 +355,7 @@ export const accommodationVisits = pgTable("accommodation_visits", {
   userId: varchar("user_id").references(() => users.id).notNull(),
   accommodationId: integer("accommodation_id").references(() => accommodations.id, { onDelete: "cascade" }).notNull(),
   visitDate: timestamp("visit_date").notNull(),
-  visitTime: varchar("visit_time").notNull(),
+  visitTime: time("visit_time").notNull(),
   status: varchar("status").default("scheduled"), // scheduled, completed, cancelled
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -337,6 +386,121 @@ export const accommodationBookings = pgTable("accommodation_bookings", {
   index("idx_accommodation_bookings_accommodation").on(table.accommodationId),
   index("idx_accommodation_bookings_room").on(table.accommodationRoomId),
   index("idx_accommodation_bookings_status").on(table.status),
+]);
+
+// Tutors table (extends users for tutor-specific data)
+export const tutors = pgTable("tutors", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull().unique(), // Enforce 1:1 user-tutor relationship
+  title: varchar("title"), // Prof, Dr, Mr, Ms
+  bio: text("bio"),
+  experience: integer("experience"), // years of experience
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }).notNull(),
+  subjects: subjectEnum("subjects").array().notNull(),
+  mode: tutorModeEnum("mode").notNull(),
+  availability: tutorAvailabilityEnum("availability").array(),
+  specializations: tutorSpecializationEnum("specializations").array(),
+  qualification: tutorQualificationEnum("qualification"),
+  institution: varchar("institution"),
+  institutionType: tutorInstitutionTypeEnum("institution_type"),
+  languages: text("languages").array(), // ["English", "Hindi", "Bengali"]
+  isVerified: boolean("is_verified").default(false),
+  isFeatured: boolean("is_featured").default(false),
+  isActive: boolean("is_active").default(true),
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }).default("0"),
+  totalRatings: integer("total_ratings").default(0),
+  totalSessions: integer("total_sessions").default(0),
+  responseTime: integer("response_time"), // average response time in hours
+  successRate: integer("success_rate"), // percentage
+  profileImageUrl: varchar("profile_image_url"),
+  demoVideoUrl: varchar("demo_video_url"),
+  certificates: text("certificates").array(), // URLs to certificate images
+  achievements: text("achievements").array(),
+  tags: text("tags").array(), // additional searchable tags
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tutors_user").on(table.userId),
+  index("idx_tutors_subjects").on(table.subjects),
+  index("idx_tutors_mode").on(table.mode),
+  index("idx_tutors_hourly_rate").on(table.hourlyRate),
+  index("idx_tutors_rating").on(table.averageRating),
+  index("idx_tutors_active").on(table.isActive),
+  unique("unique_tutors_user_id").on(table.userId),
+]);
+
+// Tutor availability slots
+export const tutorAvailabilitySlots = pgTable("tutor_availability_slots", {
+  id: serial("id").primaryKey(),
+  tutorId: integer("tutor_id").references(() => tutors.id, { onDelete: "cascade" }).notNull(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0=Sunday, 1=Monday, etc.
+  startTime: time("start_time").notNull(), // "09:00:00"
+  endTime: time("end_time").notNull(), // "10:00:00"
+  timeZone: varchar("time_zone").default("Asia/Kolkata"),
+  isRecurring: boolean("is_recurring").default(true),
+  specificDate: timestamp("specific_date"), // for one-time slots
+  isBooked: boolean("is_booked").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_tutor_slots_tutor").on(table.tutorId),
+  index("idx_tutor_slots_day").on(table.dayOfWeek),
+  index("idx_tutor_slots_booked").on(table.isBooked),
+]);
+
+// Tutor ratings and reviews
+export const tutorRatings = pgTable("tutor_ratings", {
+  id: serial("id").primaryKey(),
+  tutorId: integer("tutor_id").references(() => tutors.id, { onDelete: "cascade" }).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  rating: integer("rating").notNull(), // 1-5
+  review: text("review"),
+  isVerified: boolean("is_verified").default(false), // verified by completed session
+  sessionId: integer("session_id").references(() => tutorSessions.id, { onDelete: "set null" }), // link to actual tutoring session
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_tutor_ratings_tutor").on(table.tutorId),
+  index("idx_tutor_ratings_user").on(table.userId),
+  index("idx_tutor_ratings_rating").on(table.rating),
+]);
+
+// Tutor sessions/bookings
+export const tutorSessions = pgTable("tutor_sessions", {
+  id: serial("id").primaryKey(),
+  tutorId: integer("tutor_id").references(() => tutors.id, { onDelete: "cascade" }).notNull(),
+  studentId: varchar("student_id").references(() => users.id).notNull(),
+  slotId: integer("slot_id").references(() => tutorAvailabilitySlots.id, { onDelete: "set null" }), // link to availability slot
+  subject: subjectEnum("subject").notNull(),
+  sessionDate: timestamp("session_date").notNull(),
+  startTime: time("start_time").notNull(),
+  endTime: time("end_time").notNull(),
+  duration: integer("duration").notNull(), // in minutes
+  mode: tutorModeEnum("mode").notNull(),
+  meetingLink: varchar("meeting_link"),
+  sessionNotes: text("session_notes"),
+  status: varchar("status").default("scheduled"), // scheduled, ongoing, completed, cancelled
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentStatus: varchar("payment_status").default("pending"), // pending, paid, refunded
+  paymentReference: varchar("payment_reference"),
+  isDemo: boolean("is_demo").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_tutor_sessions_tutor").on(table.tutorId),
+  index("idx_tutor_sessions_student").on(table.studentId),
+  index("idx_tutor_sessions_date").on(table.sessionDate),
+  index("idx_tutor_sessions_status").on(table.status),
+]);
+
+// Saved/bookmarked tutors
+export const savedTutors = pgTable("saved_tutors", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  tutorId: integer("tutor_id").references(() => tutors.id, { onDelete: "cascade" }).notNull(),
+  savedAt: timestamp("saved_at").defaultNow(),
+}, (table) => [
+  index("idx_saved_tutors_user").on(table.userId),
+  index("idx_saved_tutors_tutor").on(table.tutorId),
+  unique("unique_saved_tutors_user_tutor").on(table.userId, table.tutorId),
 ]);
 
 // Saved/bookmarked content
@@ -375,6 +539,41 @@ export const usersRelations = relations(users, ({ many }) => ({
   savedAccommodations: many(savedAccommodations),
   accommodationVisits: many(accommodationVisits),
   accommodationBookings: many(accommodationBookings),
+  tutors: many(tutors),
+  tutorRatings: many(tutorRatings),
+  tutorSessions: many(tutorSessions),
+  savedTutors: many(savedTutors),
+}));
+
+export const tutorsRelations = relations(tutors, ({ one, many }) => ({
+  user: one(users, { fields: [tutors.userId], references: [users.id] }),
+  ratings: many(tutorRatings),
+  sessions: many(tutorSessions),
+  availabilitySlots: many(tutorAvailabilitySlots),
+  savedBy: many(savedTutors),
+}));
+
+export const tutorRatingsRelations = relations(tutorRatings, ({ one }) => ({
+  tutor: one(tutors, { fields: [tutorRatings.tutorId], references: [tutors.id] }),
+  user: one(users, { fields: [tutorRatings.userId], references: [users.id] }),
+  session: one(tutorSessions, { fields: [tutorRatings.sessionId], references: [tutorSessions.id] }),
+}));
+
+export const tutorSessionsRelations = relations(tutorSessions, ({ one, many }) => ({
+  tutor: one(tutors, { fields: [tutorSessions.tutorId], references: [tutors.id] }),
+  student: one(users, { fields: [tutorSessions.studentId], references: [users.id] }),
+  slot: one(tutorAvailabilitySlots, { fields: [tutorSessions.slotId], references: [tutorAvailabilitySlots.id] }),
+  ratings: many(tutorRatings),
+}));
+
+export const tutorAvailabilitySlotsRelations = relations(tutorAvailabilitySlots, ({ one, many }) => ({
+  tutor: one(tutors, { fields: [tutorAvailabilitySlots.tutorId], references: [tutors.id] }),
+  sessions: many(tutorSessions),
+}));
+
+export const savedTutorsRelations = relations(savedTutors, ({ one }) => ({
+  user: one(users, { fields: [savedTutors.userId], references: [users.id] }),
+  tutor: one(tutors, { fields: [savedTutors.tutorId], references: [tutors.id] }),
 }));
 
 export const notesRelations = relations(notes, ({ one, many }) => ({
@@ -530,6 +729,36 @@ export const insertAccommodationBookingSchema = createInsertSchema(accommodation
   updatedAt: true,
 });
 
+export const insertTutorSchema = createInsertSchema(tutors).omit({
+  id: true,
+  averageRating: true,
+  totalRatings: true,
+  totalSessions: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTutorAvailabilitySlotSchema = createInsertSchema(tutorAvailabilitySlots).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTutorRatingSchema = createInsertSchema(tutorRatings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTutorSessionSchema = createInsertSchema(tutorSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSavedTutorSchema = createInsertSchema(savedTutors).omit({
+  id: true,
+  savedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -559,6 +788,16 @@ export type InsertAccommodationVisit = z.infer<typeof insertAccommodationVisitSc
 export type AccommodationVisit = typeof accommodationVisits.$inferSelect;
 export type InsertAccommodationBooking = z.infer<typeof insertAccommodationBookingSchema>;
 export type AccommodationBooking = typeof accommodationBookings.$inferSelect;
+export type InsertTutor = z.infer<typeof insertTutorSchema>;
+export type Tutor = typeof tutors.$inferSelect;
+export type InsertTutorAvailabilitySlot = z.infer<typeof insertTutorAvailabilitySlotSchema>;
+export type TutorAvailabilitySlot = typeof tutorAvailabilitySlots.$inferSelect;
+export type InsertTutorRating = z.infer<typeof insertTutorRatingSchema>;
+export type TutorRating = typeof tutorRatings.$inferSelect;
+export type InsertTutorSession = z.infer<typeof insertTutorSessionSchema>;
+export type TutorSession = typeof tutorSessions.$inferSelect;
+export type InsertSavedTutor = z.infer<typeof insertSavedTutorSchema>;
+export type SavedTutor = typeof savedTutors.$inferSelect;
 
 // Additional types for frontend use
 export type AccommodationWithRooms = Accommodation & {
@@ -588,8 +827,51 @@ export type AccommodationSearchResult = {
   total: number;
 };
 
+// Additional types for tutor frontend use
+export type TutorWithDetails = Tutor & {
+  user?: User;
+  ratings: TutorRating[];
+  availabilitySlots: TutorAvailabilitySlot[];
+  isSaved?: boolean;
+  upcomingSlots?: string[];
+};
+
+export type TutorSearchFilters = {
+  subjects?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  mode?: (typeof tutorModeEnum.enumValues[number])[];
+  availability?: (typeof tutorAvailabilityEnum.enumValues[number])[];
+  specializations?: (typeof tutorSpecializationEnum.enumValues[number])[];
+  minRating?: number;
+  institutionType?: (typeof tutorInstitutionTypeEnum.enumValues[number])[];
+  languages?: string[];
+  isVerified?: boolean;
+  isFeatured?: boolean;
+  query?: string;
+  sortBy?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export type TutorSearchResult = {
+  tutors: TutorWithDetails[];
+  total: number;
+  categories: {
+    examPrep: number;
+    tech: number;
+    languages: number;
+    skills: number;
+  };
+};
+
 // Enum value types for easy use in components
 export type AccommodationType = typeof accommodationTypeEnum.enumValues[number];
 export type RoomType = typeof roomTypeEnum.enumValues[number];
 export type GenderPreference = typeof genderPreferenceEnum.enumValues[number];
 export type Amenity = typeof amenityEnum.enumValues[number];
+export type TutorMode = typeof tutorModeEnum.enumValues[number];
+export type TutorAvailability = typeof tutorAvailabilityEnum.enumValues[number];
+export type TutorSpecialization = typeof tutorSpecializationEnum.enumValues[number];
+export type TutorQualification = typeof tutorQualificationEnum.enumValues[number];
+export type TutorInstitutionType = typeof tutorInstitutionTypeEnum.enumValues[number];
