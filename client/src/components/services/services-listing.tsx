@@ -117,21 +117,13 @@ export default function ServicesListing({
 
   // Fetch services with filters
   const { data: servicesData, isLoading } = useQuery<{
-    services: any[];
+    vendors?: any[];
+    services?: any[];
     total: number;
   }>({
     queryKey: [apiEndpoint, {
       search: searchTerm,
-      location: selectedLocation,
       category: selectedCategory,
-      priceRanges: selectedPriceRanges,
-      ratings: selectedRatings,
-      availability: selectedAvailability,
-      subjects: selectedSubjects,
-      levels: selectedLevels,
-      universities: selectedUniversities,
-      features: selectedFeatures,
-      sortBy,
       limit: itemsPerPage,
       offset: (currentPage - 1) * itemsPerPage,
     }],
@@ -176,7 +168,10 @@ export default function ServicesListing({
     selectedLevels.length > 0 || selectedUniversities.length > 0 || selectedFeatures.length > 0 || 
     selectedLocation || searchTerm;
 
-  const totalPages = Math.ceil((servicesData?.total || 0) / itemsPerPage);
+  // Compute safe data accessors
+  const items = servicesData?.vendors ?? servicesData?.services ?? [];
+  const total = servicesData?.total ?? items.length ?? 0;
+  const totalPages = Math.ceil(total / itemsPerPage);
 
   return (
     <div className="min-h-screen bg-background">      
@@ -206,13 +201,13 @@ export default function ServicesListing({
                   />
                 </div>
                 
-                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+                <Select value={selectedLocation} onValueChange={(value) => setSelectedLocation(value === 'all' ? '' : value)}>
                   <SelectTrigger className="lg:w-48" data-testid="select-location">
                     <MapPin className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="📍 Location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Locations</SelectItem>
+                    <SelectItem value="all">All Locations</SelectItem>
                     {LOCATIONS.map(location => (
                       <SelectItem key={location.key} value={location.key}>
                         {location.label} ({location.count})
@@ -470,7 +465,7 @@ export default function ServicesListing({
               {/* View Controls */}
               <div className="flex items-center justify-between mb-6">
                 <div className="text-sm text-muted-foreground" data-testid="text-results-count">
-                  {servicesData?.total ? `Showing ${servicesData.services?.length || 0} of ${servicesData.total} services` : 'Loading...'}
+                  {total ? `Showing ${items.length} of ${total} services` : 'Loading...'}
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -521,7 +516,7 @@ export default function ServicesListing({
                     </Card>
                   ))}
                 </div>
-              ) : servicesData?.services?.length === 0 ? (
+              ) : items.length === 0 ? (
                 <Card data-testid="card-no-services">
                   <CardContent className="p-8 text-center">
                     <div className="space-y-4">
@@ -542,7 +537,7 @@ export default function ServicesListing({
                     ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" 
                     : "space-y-4"
                   } data-testid="services-container">
-                    {servicesData?.services?.map((service: any) => (
+                    {items.map((service: any) => (
                       <ServiceCard 
                         key={service.id} 
                         service={service}

@@ -553,4 +553,331 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// In-memory storage with sample data for demo purposes
+class MemStorage implements IStorage {
+  private vendorData: Vendor[] = [
+    // NOTES
+    {
+      id: 1,
+      name: "Data Structures Complete Notes",
+      description: "Complete coverage: Arrays, Trees, Graphs with examples. Perfect for final exams and interview preparation.",
+      category: "notes",
+      priceRange: "free",
+      averageRating: "4.9",
+      totalRatings: 156,
+      isVerified: true,
+      createdAt: new Date('2024-09-12'),
+      updatedAt: new Date('2024-09-12')
+    },
+    {
+      id: 2,
+      name: "Complete Physics Notes Package",
+      description: "JEE/NEET/Boards complete coverage. 500+ solved examples. Video explanations included.",
+      category: "notes",
+      priceRange: "mid-range",
+      averageRating: "4.7",
+      totalRatings: 445,
+      isVerified: true,
+      createdAt: new Date('2024-09-10'),
+      updatedAt: new Date('2024-09-14')
+    },
+    
+    // HOSTELS
+    {
+      id: 3,
+      name: "Green Valley Boys Hostel",
+      description: "Single/Double rooms available. 24/7 security. Near campus facilities. Good food quality.",
+      category: "hostels",
+      address: "500m from IIT Gate",
+      priceRange: "budget",
+      averageRating: "4.2",
+      totalRatings: 89,
+      isVerified: true,
+      createdAt: new Date('2024-08-15'),
+      updatedAt: new Date('2024-09-01')
+    },
+    {
+      id: 4,
+      name: "Campus Residences Premium PG",
+      description: "Fully furnished AC rooms. WiFi included. Mess facilities. Study room available.",
+      category: "hostels",
+      address: "Near NIT Campus",
+      priceRange: "premium",
+      averageRating: "4.6",
+      totalRatings: 124,
+      isVerified: true,
+      createdAt: new Date('2024-07-20'),
+      updatedAt: new Date('2024-09-05')
+    },
+    
+    // TUTORS
+    {
+      id: 5,
+      name: "Prof. Kumar - Mathematics Expert",
+      description: "Specializes in JEE Advanced, Olympiads, College Math. 500+ students taught. 95% success rate.",
+      category: "tutors",
+      priceRange: "mid-range",
+      averageRating: "4.9",
+      totalRatings: 234,
+      isVerified: true,
+      phone: "+91-9876543210",
+      email: "prof.kumar@tutoring.com",
+      createdAt: new Date('2024-06-01'),
+      updatedAt: new Date('2024-09-10')
+    },
+    {
+      id: 6,
+      name: "Dr. Priya - Computer Science Mentor",
+      description: "FAANG experience. DSA, System Design, Interview Prep. Online and Offline classes.",
+      category: "tutors",
+      priceRange: "premium",
+      averageRating: "4.8",
+      totalRatings: 178,
+      isVerified: true,
+      email: "dr.priya@techmentor.com",
+      createdAt: new Date('2024-05-15'),
+      updatedAt: new Date('2024-09-08')
+    },
+    
+    // EVENTS
+    {
+      id: 7,
+      name: "Tech Workshop: AI & Machine Learning",
+      description: "Build your first AI model. Industry expert speakers. Certificate provided. Networking opportunities.",
+      category: "events",
+      address: "NIT Campus Auditorium",
+      priceRange: "free",
+      averageRating: "4.8",
+      totalRatings: 67,
+      isVerified: true,
+      createdAt: new Date('2024-09-13'),
+      updatedAt: new Date('2024-09-13')
+    },
+    {
+      id: 8,
+      name: "Annual Tech Fest - CodeMania 2024",
+      description: "3-day coding competition. Hackathons, workshops, and networking sessions.",
+      category: "events",
+      address: "IIT Delhi Convention Center",
+      priceRange: "budget",
+      averageRating: "4.7",
+      totalRatings: 892,
+      isVerified: true,
+      website: "https://codemania2024.com",
+      createdAt: new Date('2024-08-01'),
+      updatedAt: new Date('2024-09-01')
+    },
+    
+    // CAFES
+    {
+      id: 9,
+      name: "Campus Café & Study Space",
+      description: "Great coffee & snacks. Quiet study environment. Power outlets at every table.",
+      category: "cafes",
+      address: "Main Campus Building",
+      priceRange: "budget",
+      averageRating: "4.3",
+      totalRatings: 124,
+      isVerified: true,
+      phone: "+91-9876543211",
+      createdAt: new Date('2024-07-01'),
+      updatedAt: new Date('2024-09-12')
+    },
+    {
+      id: 10,
+      name: "BookWorm Café",
+      description: "Library café combo. Silent zones available. Free WiFi and charging points.",
+      category: "cafes",
+      address: "University Library Ground Floor",
+      priceRange: "budget",
+      averageRating: "4.1",
+      totalRatings: 89,
+      isVerified: true,
+      createdAt: new Date('2024-06-15'),
+      updatedAt: new Date('2024-09-05')
+    },
+    
+    // FOOD
+    {
+      id: 11,
+      name: "Healthy Bites Tiffin Service",
+      description: "Home-cooked meals delivered fresh. Customizable meal plans. Hygienic preparation.",
+      category: "food",
+      priceRange: "budget",
+      averageRating: "4.4",
+      totalRatings: 167,
+      isVerified: true,
+      phone: "+91-9876543212",
+      createdAt: new Date('2024-08-01'),
+      updatedAt: new Date('2024-09-10')
+    },
+    
+    // TRANSPORT
+    {
+      id: 12,
+      name: "Campus Shuttle Service",
+      description: "Regular shuttle between hostels and campus. Safe and reliable transportation.",
+      category: "transport",
+      priceRange: "budget",
+      averageRating: "4.0",
+      totalRatings: 203,
+      isVerified: true,
+      createdAt: new Date('2024-07-15'),
+      updatedAt: new Date('2024-09-01')
+    },
+    
+    // FITNESS
+    {
+      id: 13,
+      name: "FitZone Campus Gym",
+      description: "Modern equipment. Personal training available. Student discounts offered.",
+      category: "fitness",
+      address: "Campus Recreation Center",
+      priceRange: "budget",
+      averageRating: "4.2",
+      totalRatings: 156,
+      isVerified: true,
+      phone: "+91-9876543213",
+      createdAt: new Date('2024-06-01'),
+      updatedAt: new Date('2024-09-08')
+    },
+    
+    // BOOKS
+    {
+      id: 14,
+      name: "Academic Books Exchange",
+      description: "Buy, sell, and rent textbooks. Wide collection of reference materials.",
+      category: "books",
+      address: "Near Main Gate",
+      priceRange: "budget",
+      averageRating: "4.3",
+      totalRatings: 98,
+      isVerified: true,
+      email: "books@exchange.com",
+      createdAt: new Date('2024-07-01'),
+      updatedAt: new Date('2024-09-12')
+    }
+  ];
+
+  // Vendor operations
+  async createVendor(vendor: InsertVendor, ownerId: string): Promise<Vendor> {
+    const newVendor: Vendor = {
+      id: this.vendorData.length + 1,
+      ...vendor,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.vendorData.push(newVendor);
+    return newVendor;
+  }
+
+  async getVendors(filters?: {
+    category?: string;
+    searchTerm?: string;
+    location?: { lat: number; lng: number; radius: number };
+    limit?: number;
+    offset?: number;
+  }): Promise<{ vendors: Vendor[]; total: number }> {
+    let filtered = [...this.vendorData];
+
+    // Apply filters
+    if (filters?.category) {
+      filtered = filtered.filter(v => v.category === filters.category);
+    }
+    
+    if (filters?.searchTerm) {
+      const search = filters.searchTerm.toLowerCase();
+      filtered = filtered.filter(v => 
+        v.name.toLowerCase().includes(search) ||
+        v.description?.toLowerCase().includes(search) ||
+        v.category.toLowerCase().includes(search)
+      );
+    }
+
+    const total = filtered.length;
+    
+    // Apply pagination
+    const offset = filters?.offset || 0;
+    const limit = filters?.limit || 20;
+    const paginatedVendors = filtered.slice(offset, offset + limit);
+
+    return { vendors: paginatedVendors, total };
+  }
+
+  async getVendorById(id: number): Promise<Vendor | undefined> {
+    return this.vendorData.find(v => v.id === id);
+  }
+
+  async updateVendor(id: number, vendor: Partial<InsertVendor>, userId: string): Promise<boolean> {
+    const index = this.vendorData.findIndex(v => v.id === id);
+    if (index === -1) return false;
+    
+    this.vendorData[index] = { ...this.vendorData[index], ...vendor, updatedAt: new Date() };
+    return true;
+  }
+
+  async deleteVendor(id: number, userId: string): Promise<boolean> {
+    const index = this.vendorData.findIndex(v => v.id === id);
+    if (index === -1) return false;
+    
+    this.vendorData.splice(index, 1);
+    return true;
+  }
+
+  // Vendor rating operations
+  async addVendorRating(rating: InsertVendorRating): Promise<VendorRating> {
+    return {
+      id: Math.floor(Math.random() * 10000),
+      ...rating,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as VendorRating;
+  }
+
+  async getVendorRatings(vendorId: number): Promise<VendorRating[]> {
+    return [];
+  }
+
+  // All other methods - placeholder implementations for demo
+  async getUser(id: string): Promise<User | undefined> { return undefined; }
+  async upsertUser(user: UpsertUser): Promise<User> { throw new Error('Not implemented in demo'); }
+  async createNote(note: InsertNote, uploaderId: string): Promise<Note> { throw new Error('Not implemented in demo'); }
+  async getNotes(): Promise<{ notes: Note[]; total: number }> { return { notes: [], total: 0 }; }
+  async getNoteById(id: number): Promise<Note | undefined> { return undefined; }
+  async getNoteWithDetails(id: number): Promise<any> { return null; }
+  async updateNoteViews(id: number): Promise<void> {}
+  async updateNoteDownloads(id: number): Promise<void> {}
+  async deleteNote(id: number, userId: string): Promise<boolean> { return false; }
+  async addNoteFile(file: InsertNoteFile): Promise<NoteFile> { throw new Error('Not implemented in demo'); }
+  async getNoteFiles(noteId: number): Promise<NoteFile[]> { return []; }
+  async deleteNoteFile(id: number): Promise<void> {}
+  async addNoteRating(rating: InsertNoteRating): Promise<NoteRating> { throw new Error('Not implemented in demo'); }
+  async getNoteRatings(noteId: number): Promise<NoteRating[]> { return []; }
+  async getUserNoteRating(noteId: number, userId: string): Promise<NoteRating | undefined> { return undefined; }
+  async updateNoteRating(id: number, rating: number, review?: string): Promise<void> {}
+  async addNoteComment(comment: InsertNoteComment): Promise<NoteComment> { throw new Error('Not implemented in demo'); }
+  async getNoteComments(noteId: number): Promise<NoteComment[]> { return []; }
+  async saveNote(savedNote: InsertSavedNote): Promise<SavedNote> { throw new Error('Not implemented in demo'); }
+  async unsaveNote(noteId: number, userId: string): Promise<void> {}
+  async getUserSavedNotes(userId: string): Promise<Note[]> { return []; }
+  async isNoteSaved(noteId: number, userId: string): Promise<boolean> { return false; }
+  async createAdvertisement(ad: InsertAdvertisement, createdBy: string): Promise<Advertisement> { throw new Error('Not implemented in demo'); }
+  async getAdvertisements(placement?: string): Promise<Advertisement[]> { return []; }
+  async updateAdvertisement(id: number, ad: Partial<InsertAdvertisement>): Promise<void> {}
+  async deleteAdvertisement(id: number): Promise<void> {}
+  async getTopNotes(limit?: number): Promise<Note[]> { return []; }
+  async getTrendingNotes(limit?: number): Promise<Note[]> { return []; }
+  async getRecentNotes(limit?: number): Promise<Note[]> { return []; }
+  async getSubjectStats(): Promise<{ subject: string; count: number }[]> { return []; }
+}
+
+// Use MemStorage for demo when database is not available
+let storageInstance: IStorage;
+try {
+  storageInstance = new DatabaseStorage();
+} catch (error) {
+  console.log('Database not available, using MemStorage for demo');
+  storageInstance = new MemStorage();
+}
+
+export const storage = new MemStorage();

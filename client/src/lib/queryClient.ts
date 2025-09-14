@@ -76,19 +76,34 @@ export const getQueryFn: <T>(options: {
   async ({ queryKey }) => {
     // Handle query keys with parameters: [url, params] format
     let url: string;
-    if (queryKey.length === 2 && typeof queryKey[1] === 'string' && queryKey[1].startsWith('{')) {
-      // If second element is JSON params, construct URL with search params
+    if (queryKey.length === 2) {
       const baseUrl = queryKey[0] as string;
-      const params = JSON.parse(queryKey[1] as string);
-      const searchParams = new URLSearchParams();
+      let params: Record<string, any>;
       
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          searchParams.append(key, String(value));
-        }
-      });
+      // Handle both JSON string params (for backward compatibility) and object params
+      if (typeof queryKey[1] === 'string' && queryKey[1].startsWith('{')) {
+        params = JSON.parse(queryKey[1] as string);
+      } else if (typeof queryKey[1] === 'object' && queryKey[1] !== null) {
+        params = queryKey[1] as Record<string, any>;
+      } else {
+        // Fallback to join behavior if second element is neither JSON string nor object
+        url = queryKey.join("/") as string;
+        params = {};
+      }
       
-      url = searchParams.toString() ? `${baseUrl}?${searchParams}` : baseUrl;
+      if (params && Object.keys(params).length > 0) {
+        const searchParams = new URLSearchParams();
+        
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            searchParams.append(key, String(value));
+          }
+        });
+        
+        url = searchParams.toString() ? `${baseUrl}?${searchParams}` : baseUrl;
+      } else {
+        url = baseUrl;
+      }
     } else {
       // Default behavior: join all segments with "/"
       url = queryKey.join("/") as string;

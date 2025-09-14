@@ -9,7 +9,7 @@ export default function BrowseServices() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <ServicesListing 
-        apiEndpoint="/api/services"
+        apiEndpoint="/api/vendors"
         title="Browse All Services"
         subtitle="Discover 10,000+ verified services across India"
       />
