@@ -156,6 +156,45 @@ export const vendorCategoryEnum = pgEnum("vendor_category", [
   "shopping"
 ]);
 
+// Accommodation specific enums
+export const accommodationTypeEnum = pgEnum("accommodation_type", [
+  "pg",
+  "hostel", 
+  "apartment",
+  "shared-room",
+  "flat"
+]);
+
+export const roomTypeEnum = pgEnum("room_type", [
+  "single",
+  "double",
+  "triple",
+  "dormitory"
+]);
+
+export const genderPreferenceEnum = pgEnum("gender_preference", [
+  "boys",
+  "girls", 
+  "co-ed"
+]);
+
+export const amenityEnum = pgEnum("amenity", [
+  "ac",
+  "wifi",
+  "mess", 
+  "laundry",
+  "security",
+  "cctv",
+  "gym",
+  "pool",
+  "parking",
+  "study-room",
+  "common-area",
+  "hot-water",
+  "attached-bath",
+  "meals"
+]);
+
 // Vendors table
 export const vendors = pgTable("vendors", {
   id: serial("id").primaryKey(),
@@ -194,6 +233,112 @@ export const vendorRatings = pgTable("vendor_ratings", {
   index("idx_vendor_ratings_user").on(table.userId),
 ]);
 
+// Accommodations table (extends vendors for accommodation-specific data)
+export const accommodations = pgTable("accommodations", {
+  id: serial("id").primaryKey(),
+  vendorId: integer("vendor_id").references(() => vendors.id, { onDelete: "cascade" }).notNull(),
+  accommodationType: accommodationTypeEnum("accommodation_type").notNull(),
+  genderPreference: genderPreferenceEnum("gender_preference").notNull(),
+  totalRooms: integer("total_rooms").notNull(),
+  availableRooms: integer("available_rooms").notNull(),
+  distanceFromCollege: integer("distance_from_college"), // in meters
+  collegeName: varchar("college_name"),
+  amenities: amenityEnum("amenities").array(),
+  photos: text("photos").array(), // URLs to photos
+  hasVirtualTour: boolean("has_virtual_tour").default(false),
+  virtualTourUrl: varchar("virtual_tour_url"),
+  safetyFeatures: text("safety_features").array(),
+  houseRules: text("house_rules").array(),
+  foodIncluded: boolean("food_included").default(false),
+  mealsPerDay: integer("meals_per_day"),
+  wifiSpeed: varchar("wifi_speed"),
+  checkInTime: varchar("check_in_time"),
+  checkOutTime: varchar("check_out_time"),
+  securityDeposit: decimal("security_deposit", { precision: 10, scale: 2 }),
+  isPremium: boolean("is_premium").default(false),
+  isFeatured: boolean("is_featured").default(false),
+  isNew: boolean("is_new").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_accommodations_vendor").on(table.vendorId),
+  index("idx_accommodations_type").on(table.accommodationType),
+  index("idx_accommodations_gender").on(table.genderPreference),
+  index("idx_accommodations_college").on(table.collegeName),
+  index("idx_accommodations_distance").on(table.distanceFromCollege),
+]);
+
+// Room types and pricing for each accommodation
+export const accommodationRooms = pgTable("accommodation_rooms", {
+  id: serial("id").primaryKey(),
+  accommodationId: integer("accommodation_id").references(() => accommodations.id, { onDelete: "cascade" }).notNull(),
+  roomType: roomTypeEnum("room_type").notNull(),
+  pricePerMonth: decimal("price_per_month", { precision: 10, scale: 2 }).notNull(),
+  totalRooms: integer("total_rooms").notNull(),
+  availableRooms: integer("available_rooms").notNull(),
+  maxOccupancy: integer("max_occupancy").notNull(),
+  roomSize: varchar("room_size"), // e.g., "12x10 feet"
+  hasAttachedBath: boolean("has_attached_bath").default(false),
+  hasBalcony: boolean("has_balcony").default(false),
+  hasFurnishing: boolean("has_furnishing").default(false),
+  description: text("description"),
+}, (table) => [
+  index("idx_accommodation_rooms_accommodation").on(table.accommodationId),
+  index("idx_accommodation_rooms_type").on(table.roomType),
+  index("idx_accommodation_rooms_price").on(table.pricePerMonth),
+]);
+
+// Saved/bookmarked accommodations
+export const savedAccommodations = pgTable("saved_accommodations", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  accommodationId: integer("accommodation_id").references(() => accommodations.id, { onDelete: "cascade" }).notNull(),
+  savedAt: timestamp("saved_at").defaultNow(),
+}, (table) => [
+  index("idx_saved_accommodations_user").on(table.userId),
+  index("idx_saved_accommodations_accommodation").on(table.accommodationId),
+  index("idx_saved_accommodations_unique").on(table.userId, table.accommodationId),
+]);
+
+// Accommodation visits/bookings
+export const accommodationVisits = pgTable("accommodation_visits", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  accommodationId: integer("accommodation_id").references(() => accommodations.id, { onDelete: "cascade" }).notNull(),
+  visitDate: timestamp("visit_date").notNull(),
+  visitTime: varchar("visit_time").notNull(),
+  status: varchar("status").default("scheduled"), // scheduled, completed, cancelled
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_accommodation_visits_user").on(table.userId),
+  index("idx_accommodation_visits_accommodation").on(table.accommodationId),
+]);
+
+// Accommodation bookings/reservations
+export const accommodationBookings = pgTable("accommodation_bookings", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  accommodationId: integer("accommodation_id").references(() => accommodations.id, { onDelete: "cascade" }).notNull(),
+  accommodationRoomId: integer("accommodation_room_id").references(() => accommodationRooms.id, { onDelete: "cascade" }).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  tenureMonths: integer("tenure_months"),
+  pricePerMonth: decimal("price_per_month", { precision: 10, scale: 2 }).notNull(),
+  securityDeposit: decimal("security_deposit", { precision: 10, scale: 2 }),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }),
+  status: varchar("status").default("pending"), // pending, confirmed, cancelled, completed
+  paymentReference: varchar("payment_reference"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_accommodation_bookings_user").on(table.userId),
+  index("idx_accommodation_bookings_accommodation").on(table.accommodationId),
+  index("idx_accommodation_bookings_room").on(table.accommodationRoomId),
+  index("idx_accommodation_bookings_status").on(table.status),
+]);
+
 // Saved/bookmarked content
 export const savedNotes = pgTable("saved_notes", {
   id: serial("id").primaryKey(),
@@ -227,6 +372,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   savedNotes: many(savedNotes),
   vendors: many(vendors),
   vendorRatings: many(vendorRatings),
+  savedAccommodations: many(savedAccommodations),
+  accommodationVisits: many(accommodationVisits),
+  accommodationBookings: many(accommodationBookings),
 }));
 
 export const notesRelations = relations(notes, ({ one, many }) => ({
@@ -256,6 +404,35 @@ export const noteCommentsRelations = relations(noteComments, ({ one, many }) => 
 export const vendorsRelations = relations(vendors, ({ one, many }) => ({
   owner: one(users, { fields: [vendors.ownerId], references: [users.id] }),
   ratings: many(vendorRatings),
+  accommodations: many(accommodations),
+}));
+
+export const accommodationsRelations = relations(accommodations, ({ one, many }) => ({
+  vendor: one(vendors, { fields: [accommodations.vendorId], references: [vendors.id] }),
+  rooms: many(accommodationRooms),
+  savedBy: many(savedAccommodations),
+  visits: many(accommodationVisits),
+  bookings: many(accommodationBookings),
+}));
+
+export const accommodationRoomsRelations = relations(accommodationRooms, ({ one }) => ({
+  accommodation: one(accommodations, { fields: [accommodationRooms.accommodationId], references: [accommodations.id] }),
+}));
+
+export const savedAccommodationsRelations = relations(savedAccommodations, ({ one }) => ({
+  user: one(users, { fields: [savedAccommodations.userId], references: [users.id] }),
+  accommodation: one(accommodations, { fields: [savedAccommodations.accommodationId], references: [accommodations.id] }),
+}));
+
+export const accommodationVisitsRelations = relations(accommodationVisits, ({ one }) => ({
+  user: one(users, { fields: [accommodationVisits.userId], references: [users.id] }),
+  accommodation: one(accommodations, { fields: [accommodationVisits.accommodationId], references: [accommodations.id] }),
+}));
+
+export const accommodationBookingsRelations = relations(accommodationBookings, ({ one }) => ({
+  user: one(users, { fields: [accommodationBookings.userId], references: [users.id] }),
+  accommodation: one(accommodations, { fields: [accommodationBookings.accommodationId], references: [accommodations.id] }),
+  room: one(accommodationRooms, { fields: [accommodationBookings.accommodationRoomId], references: [accommodationRooms.id] }),
 }));
 
 export const vendorRatingsRelations = relations(vendorRatings, ({ one }) => ({
@@ -327,6 +504,32 @@ export const insertAdvertisementSchema = createInsertSchema(advertisements).omit
   createdAt: true,
 });
 
+export const insertAccommodationSchema = createInsertSchema(accommodations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAccommodationRoomSchema = createInsertSchema(accommodationRooms).omit({
+  id: true,
+});
+
+export const insertSavedAccommodationSchema = createInsertSchema(savedAccommodations).omit({
+  id: true,
+  savedAt: true,
+});
+
+export const insertAccommodationVisitSchema = createInsertSchema(accommodationVisits).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAccommodationBookingSchema = createInsertSchema(accommodationBookings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -346,3 +549,13 @@ export type InsertSavedNote = z.infer<typeof insertSavedNoteSchema>;
 export type SavedNote = typeof savedNotes.$inferSelect;
 export type InsertAdvertisement = z.infer<typeof insertAdvertisementSchema>;
 export type Advertisement = typeof advertisements.$inferSelect;
+export type InsertAccommodation = z.infer<typeof insertAccommodationSchema>;
+export type Accommodation = typeof accommodations.$inferSelect;
+export type InsertAccommodationRoom = z.infer<typeof insertAccommodationRoomSchema>;
+export type AccommodationRoom = typeof accommodationRooms.$inferSelect;
+export type InsertSavedAccommodation = z.infer<typeof insertSavedAccommodationSchema>;
+export type SavedAccommodation = typeof savedAccommodations.$inferSelect;
+export type InsertAccommodationVisit = z.infer<typeof insertAccommodationVisitSchema>;
+export type AccommodationVisit = typeof accommodationVisits.$inferSelect;
+export type InsertAccommodationBooking = z.infer<typeof insertAccommodationBookingSchema>;
+export type AccommodationBooking = typeof accommodationBookings.$inferSelect;
