@@ -28,6 +28,7 @@ import AuthDemo from "@/pages/auth-demo";
 import AuthCallback from "@/pages/auth/callback";
 import SignIn from "@/pages/signin";
 import HowItWorks from "@/pages/how-it-works";
+import BrowseServices from "@/pages/browse-services";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -38,6 +39,8 @@ function Router() {
         <>
           <Route path="/" component={Landing} />
           <Route path="/how-it-works" component={HowItWorks} />
+          <Route path="/browse-services" component={BrowseServices} />
+          <Route path="/vendors" component={Vendors} />
           <Route path="/signin" component={SignIn} />
           <Route path="/auth-demo" component={AuthDemo} />
           <Route path="/auth/callback" component={AuthCallback} />
@@ -50,6 +53,7 @@ function Router() {
           <Route path="/upload" component={UploadNotes} />
           <Route path="/browse" component={BrowseNotes} />
           <Route path="/notes/:id" component={NoteDetail} />
+          <Route path="/browse-services" component={BrowseServices} />
           <Route path="/vendors" component={Vendors} />
           <Route path="/admin" component={Admin} />
           <Route path="/study-groups" component={StudyGroups} />
