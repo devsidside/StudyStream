@@ -8,6 +8,11 @@ import {
   vendorRatings,
   savedNotes,
   advertisements,
+  accommodations,
+  accommodationRooms,
+  savedAccommodations,
+  accommodationVisits,
+  accommodationBookings,
   type User,
   type UpsertUser,
   type InsertNote,
@@ -26,6 +31,16 @@ import {
   type SavedNote,
   type InsertAdvertisement,
   type Advertisement,
+  type InsertAccommodation,
+  type Accommodation,
+  type InsertAccommodationRoom,
+  type AccommodationRoom,
+  type InsertSavedAccommodation,
+  type SavedAccommodation,
+  type InsertAccommodationVisit,
+  type AccommodationVisit,
+  type InsertAccommodationBooking,
+  type AccommodationBooking,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, asc, like, and, or, sql, count, avg } from "drizzle-orm";
@@ -84,6 +99,32 @@ export interface IStorage {
   addVendorRating(rating: InsertVendorRating): Promise<VendorRating>;
   getVendorRatings(vendorId: number): Promise<VendorRating[]>;
 
+  // Accommodation operations
+  getAccommodations(filters?: {
+    college?: string;
+    distance?: number;
+    accommodationType?: string;
+    genderPreference?: string;
+    amenities?: string[];
+    priceRange?: { min?: number; max?: number };
+    roomType?: string;
+    rating?: number;
+    searchTerm?: string;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+  }): Promise<{ accommodations: any[]; total: number }>;
+  getAccommodationById(id: number): Promise<any>;
+  createAccommodation(accommodation: InsertAccommodation): Promise<Accommodation>;
+  createAccommodationRoom(room: InsertAccommodationRoom): Promise<AccommodationRoom>;
+  
+  // Accommodation booking operations
+  saveAccommodation(savedAccommodation: InsertSavedAccommodation): Promise<SavedAccommodation>;
+  unsaveAccommodation(accommodationId: number, userId: string): Promise<void>;
+  getUserSavedAccommodations(userId: string): Promise<any[]>;
+  scheduleAccommodationVisit(visit: InsertAccommodationVisit): Promise<AccommodationVisit>;
+  bookAccommodation(booking: InsertAccommodationBooking): Promise<AccommodationBooking>;
+
   // Saved notes operations
   saveNote(savedNote: InsertSavedNote): Promise<SavedNote>;
   unsaveNote(noteId: number, userId: string): Promise<void>;
@@ -102,6 +143,19 @@ export interface IStorage {
   getRecentNotes(limit?: number): Promise<Note[]>;
   getSubjectStats(): Promise<{ subject: string; count: number }[]>;
 }
+
+// Category mapping for vendor categories
+const mapCategory = (category?: string) => {
+  const categoryMap = {
+    'hostels': 'accommodation',
+    'tutors': 'tutoring', 
+    'events': 'entertainment',
+    'books': 'shopping',
+    'cafes': 'food',
+    'fitness': 'services'
+  } as const;
+  return categoryMap[category?.toLowerCase() as keyof typeof categoryMap] || category;
+};
 
 export class DatabaseStorage implements IStorage {
   // User operations
@@ -146,8 +200,8 @@ export class DatabaseStorage implements IStorage {
     const limit = filters?.limit || 20;
     const offset = filters?.offset || 0;
 
-    let query = db.select().from(notes);
-    let countQuery = db.select({ count: count() }).from(notes);
+    let query = db.select().from(notes) as any;
+    let countQuery = db.select({ count: count(notes.id) }).from(notes) as any;
 
     const conditions = [];
     
@@ -175,17 +229,17 @@ export class DatabaseStorage implements IStorage {
 
     if (conditions.length > 0) {
       const whereCondition = and(...conditions);
-      query = query.where(whereCondition);
-      countQuery = countQuery.where(whereCondition);
+      query = query.where(whereCondition) as any;
+      countQuery = countQuery.where(whereCondition) as any;
     }
 
     // Apply sorting
     if (filters?.sortBy === 'popular') {
-      query = query.orderBy(desc(notes.totalDownloads));
+      query = query.orderBy(desc(notes.totalDownloads)) as any;
     } else if (filters?.sortBy === 'rating') {
-      query = query.orderBy(desc(notes.averageRating));
+      query = query.orderBy(desc(notes.averageRating)) as any;
     } else {
-      query = query.orderBy(desc(notes.createdAt));
+      query = query.orderBy(desc(notes.createdAt)) as any;
     }
 
     const [notesResult, totalResult] = await Promise.all([
@@ -275,10 +329,7 @@ export class DatabaseStorage implements IStorage {
 
   async getNoteRatings(noteId: number): Promise<NoteRating[]> {
     return await db
-      .select({
-        ...noteRatings,
-        user: users,
-      })
+      .select()
       .from(noteRatings)
       .leftJoin(users, eq(noteRatings.userId, users.id))
       .where(eq(noteRatings.noteId, noteId))
@@ -332,10 +383,7 @@ export class DatabaseStorage implements IStorage {
 
   async getNoteComments(noteId: number): Promise<NoteComment[]> {
     return await db
-      .select({
-        ...noteComments,
-        user: users,
-      })
+      .select()
       .from(noteComments)
       .leftJoin(users, eq(noteComments.userId, users.id))
       .where(eq(noteComments.noteId, noteId))
@@ -361,13 +409,14 @@ export class DatabaseStorage implements IStorage {
     const limit = filters?.limit || 20;
     const offset = filters?.offset || 0;
 
-    let query = db.select().from(vendors);
-    let countQuery = db.select({ count: count() }).from(vendors);
+    let query = db.select().from(vendors) as any;
+    let countQuery = db.select({ count: count(vendors.id) }).from(vendors) as any;
 
     const conditions = [eq(vendors.isActive, true)];
     
     if (filters?.category) {
-      conditions.push(eq(vendors.category, filters.category as any));
+      const mappedCategory = mapCategory(filters.category);
+      conditions.push(eq(vendors.category, mappedCategory as any));
     }
     
     if (filters?.searchTerm) {
@@ -375,13 +424,13 @@ export class DatabaseStorage implements IStorage {
         or(
           like(vendors.name, `%${filters.searchTerm}%`),
           like(vendors.description, `%${filters.searchTerm}%`)
-        )
+        )!
       );
     }
 
     const whereCondition = and(...conditions);
-    query = query.where(whereCondition);
-    countQuery = countQuery.where(whereCondition);
+    query = query.where(whereCondition) as any;
+    countQuery = countQuery.where(whereCondition) as any;
 
     const [vendorsResult, totalResult] = await Promise.all([
       query.orderBy(desc(vendors.averageRating)).limit(limit).offset(offset),
@@ -428,10 +477,7 @@ export class DatabaseStorage implements IStorage {
 
   async getVendorRatings(vendorId: number): Promise<VendorRating[]> {
     return await db
-      .select({
-        ...vendorRatings,
-        user: users,
-      })
+      .select()
       .from(vendorRatings)
       .leftJoin(users, eq(vendorRatings.userId, users.id))
       .where(eq(vendorRatings.vendorId, vendorId))
@@ -497,10 +543,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdvertisements(placement?: string): Promise<Advertisement[]> {
-    let query = db.select().from(advertisements).where(eq(advertisements.isActive, true));
+    let query = db.select().from(advertisements).where(eq(advertisements.isActive, true)) as any;
     
     if (placement) {
-      query = query.where(and(eq(advertisements.isActive, true), eq(advertisements.placement, placement)));
+      query = query.where(and(eq(advertisements.isActive, true), eq(advertisements.placement, placement))) as any;
     }
     
     return await query.orderBy(desc(advertisements.createdAt));
@@ -551,17 +597,276 @@ export class DatabaseStorage implements IStorage {
       .groupBy(notes.subject)
       .orderBy(desc(count(notes.id)));
   }
+
+  // Accommodation operations
+  async getAccommodations(filters?: {
+    college?: string;
+    distance?: number;
+    accommodationType?: string;
+    genderPreference?: string;
+    amenities?: string[];
+    priceRange?: { min?: number; max?: number };
+    roomType?: string;
+    rating?: number;
+    searchTerm?: string;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+  }): Promise<{ accommodations: any[]; total: number }> {
+    const limit = filters?.limit || 20;
+    const offset = filters?.offset || 0;
+
+    // Build base query with joins
+    let query = db
+      .select({
+        accommodation: accommodations,
+        vendor: vendors,
+        rooms: accommodationRooms,
+      })
+      .from(accommodations)
+      .leftJoin(vendors, eq(accommodations.vendorId, vendors.id))
+      .leftJoin(accommodationRooms, eq(accommodations.id, accommodationRooms.accommodationId));
+
+    let countQuery = db
+      .select({ count: sql`count(distinct ${accommodations.id})`.as('count') })
+      .from(accommodations)
+      .leftJoin(vendors, eq(accommodations.vendorId, vendors.id))
+      .leftJoin(accommodationRooms, eq(accommodations.id, accommodationRooms.accommodationId)) as any;
+
+    const conditions = [eq(vendors.isActive, true)];
+
+    // Apply filters
+    if (filters?.college) {
+      conditions.push(like(accommodations.collegeName, `%${filters.college}%`));
+    }
+
+    if (filters?.distance && typeof filters.distance === 'number') {
+      conditions.push(sql`${accommodations.distanceFromCollege} <= ${filters.distance}`);
+    }
+
+    if (filters?.accommodationType) {
+      conditions.push(eq(accommodations.accommodationType, filters.accommodationType as any));
+    }
+
+    if (filters?.genderPreference) {
+      conditions.push(eq(accommodations.genderPreference, filters.genderPreference as any));
+    }
+
+    if (filters?.amenities && filters.amenities.length > 0) {
+      // Check if accommodation has all required amenities
+      conditions.push(
+        sql`${accommodations.amenities} @> ARRAY[${filters.amenities.join(',')}]`
+      );
+    }
+
+    if (filters?.roomType) {
+      conditions.push(eq(accommodationRooms.roomType, filters.roomType as any));
+    }
+
+    if (filters?.priceRange?.min || filters?.priceRange?.max) {
+      if (filters.priceRange.min) {
+        conditions.push(sql`${accommodationRooms.pricePerMonth} >= ${filters.priceRange.min}`);
+      }
+      if (filters.priceRange.max) {
+        conditions.push(sql`${accommodationRooms.pricePerMonth} <= ${filters.priceRange.max}`);
+      }
+    }
+
+    if (filters?.rating && typeof filters.rating === 'number') {
+      conditions.push(sql`CAST(${vendors.averageRating} AS NUMERIC) >= ${filters.rating}`);
+    }
+
+    if (filters?.searchTerm) {
+      conditions.push(
+        or(
+          like(vendors.name, `%${filters.searchTerm}%`),
+          like(vendors.description, `%${filters.searchTerm}%`),
+          like(accommodations.collegeName, `%${filters.searchTerm}%`)
+        )!
+      );
+    }
+
+    if (conditions.length > 0) {
+      const whereCondition = and(...conditions);
+      query = query.where(whereCondition) as any;
+      countQuery = countQuery.where(whereCondition) as any;
+    }
+
+    // Apply sorting
+    if (filters?.sortBy === 'price-low') {
+      query = query.orderBy(asc(accommodationRooms.pricePerMonth)) as any;
+    } else if (filters?.sortBy === 'price-high') {
+      query = query.orderBy(desc(accommodationRooms.pricePerMonth)) as any;
+    } else if (filters?.sortBy === 'rating') {
+      query = query.orderBy(desc(vendors.averageRating)) as any;
+    } else if (filters?.sortBy === 'distance') {
+      query = query.orderBy(asc(accommodations.distanceFromCollege)) as any;
+    } else {
+      query = query.orderBy(desc(accommodations.createdAt)) as any;
+    }
+
+    const [accommodationsResult, totalResult] = await Promise.all([
+      query.limit(limit).offset(offset),
+      countQuery
+    ]);
+
+    // Group results by accommodation
+    const accommodationMap = new Map();
+    accommodationsResult.forEach(row => {
+      if (!accommodationMap.has(row.accommodation.id)) {
+        accommodationMap.set(row.accommodation.id, {
+          ...row.accommodation,
+          vendor: row.vendor,
+          rooms: []
+        });
+      }
+      if (row.rooms) {
+        const accommodation = accommodationMap.get(row.accommodation.id);
+        accommodation.rooms.push(row.rooms);
+      }
+    });
+
+    return {
+      accommodations: Array.from(accommodationMap.values()),
+      total: totalResult[0]?.count || 0
+    };
+  }
+
+  async getAccommodationById(id: number): Promise<any> {
+    const result = await db
+      .select({
+        accommodation: accommodations,
+        vendor: vendors,
+        rooms: accommodationRooms,
+      })
+      .from(accommodations)
+      .leftJoin(vendors, eq(accommodations.vendorId, vendors.id))
+      .leftJoin(accommodationRooms, eq(accommodations.id, accommodationRooms.accommodationId))
+      .where(eq(accommodations.id, id));
+
+    if (result.length === 0) return undefined;
+
+    const accommodation = result[0].accommodation;
+    const vendor = result[0].vendor;
+    const rooms = result
+      .filter(row => row.rooms)
+      .map(row => row.rooms);
+
+    return { ...accommodation, vendor, rooms };
+  }
+
+  async createAccommodation(accommodationData: InsertAccommodation): Promise<Accommodation> {
+    const [newAccommodation] = await db
+      .insert(accommodations)
+      .values(accommodationData)
+      .returning();
+    return newAccommodation;
+  }
+
+  async createAccommodationRoom(roomData: InsertAccommodationRoom): Promise<AccommodationRoom> {
+    const [newRoom] = await db
+      .insert(accommodationRooms)
+      .values(roomData)
+      .returning();
+    return newRoom;
+  }
+
+  // Accommodation booking operations
+  async saveAccommodation(savedAccommodationData: InsertSavedAccommodation): Promise<SavedAccommodation> {
+    const [savedAccommodation] = await db
+      .insert(savedAccommodations)
+      .values(savedAccommodationData)
+      .returning();
+    return savedAccommodation;
+  }
+
+  async unsaveAccommodation(accommodationId: number, userId: string): Promise<void> {
+    await db
+      .delete(savedAccommodations)
+      .where(and(
+        eq(savedAccommodations.accommodationId, accommodationId),
+        eq(savedAccommodations.userId, userId)
+      ));
+  }
+
+  async getUserSavedAccommodations(userId: string): Promise<any[]> {
+    const result = await db
+      .select({
+        accommodation: accommodations,
+        vendor: vendors,
+        rooms: accommodationRooms,
+        savedAt: savedAccommodations.savedAt,
+      })
+      .from(savedAccommodations)
+      .leftJoin(accommodations, eq(savedAccommodations.accommodationId, accommodations.id))
+      .leftJoin(vendors, eq(accommodations.vendorId, vendors.id))
+      .leftJoin(accommodationRooms, eq(accommodations.id, accommodationRooms.accommodationId))
+      .where(eq(savedAccommodations.userId, userId))
+      .orderBy(desc(savedAccommodations.savedAt));
+
+    // Group results by accommodation
+    const accommodationMap = new Map();
+    result.forEach(row => {
+      if (!accommodationMap.has(row.accommodation?.id)) {
+        accommodationMap.set(row.accommodation?.id, {
+          ...row.accommodation,
+          vendor: row.vendor,
+          savedAt: row.savedAt,
+          rooms: []
+        });
+      }
+      if (row.rooms) {
+        const accommodation = accommodationMap.get(row.accommodation?.id);
+        accommodation.rooms.push(row.rooms);
+      }
+    });
+
+    return Array.from(accommodationMap.values()).filter(acc => acc.id);
+  }
+
+  async scheduleAccommodationVisit(visitData: InsertAccommodationVisit): Promise<AccommodationVisit> {
+    const [visit] = await db
+      .insert(accommodationVisits)
+      .values(visitData)
+      .returning();
+    return visit;
+  }
+
+  async bookAccommodation(bookingData: InsertAccommodationBooking): Promise<AccommodationBooking> {
+    const [booking] = await db
+      .insert(accommodationBookings)
+      .values(bookingData)
+      .returning();
+    
+    // Update room availability
+    await db
+      .update(accommodationRooms)
+      .set({
+        availableRooms: sql`${accommodationRooms.availableRooms} - 1`
+      })
+      .where(eq(accommodationRooms.id, bookingData.accommodationRoomId));
+
+    // Update accommodation availability
+    await db
+      .update(accommodations)
+      .set({
+        availableRooms: sql`${accommodations.availableRooms} - 1`
+      })
+      .where(eq(accommodations.id, bookingData.accommodationId));
+
+    return booking;
+  }
 }
 
 // In-memory storage with sample data for demo purposes
 class MemStorage implements IStorage {
-  private vendorData: Vendor[] = [
+  private vendorData = [
     // NOTES
     {
       id: 1,
       name: "Data Structures Complete Notes",
       description: "Complete coverage: Arrays, Trees, Graphs with examples. Perfect for final exams and interview preparation.",
-      category: "notes",
+      category: "services",
       priceRange: "free",
       averageRating: "4.9",
       totalRatings: 156,
@@ -573,7 +878,7 @@ class MemStorage implements IStorage {
       id: 2,
       name: "Complete Physics Notes Package",
       description: "JEE/NEET/Boards complete coverage. 500+ solved examples. Video explanations included.",
-      category: "notes",
+      category: "services",
       priceRange: "mid-range",
       averageRating: "4.7",
       totalRatings: 445,
@@ -587,7 +892,7 @@ class MemStorage implements IStorage {
       id: 3,
       name: "Green Valley Boys Hostel",
       description: "Single/Double rooms available. 24/7 security. Near campus facilities. Good food quality.",
-      category: "hostels",
+      category: "accommodation",
       address: "500m from IIT Gate",
       priceRange: "budget",
       averageRating: "4.2",
@@ -600,7 +905,7 @@ class MemStorage implements IStorage {
       id: 4,
       name: "Campus Residences Premium PG",
       description: "Fully furnished AC rooms. WiFi included. Mess facilities. Study room available.",
-      category: "hostels",
+      category: "accommodation",
       address: "Near NIT Campus",
       priceRange: "premium",
       averageRating: "4.6",
@@ -615,7 +920,7 @@ class MemStorage implements IStorage {
       id: 5,
       name: "Prof. Kumar - Mathematics Expert",
       description: "Specializes in JEE Advanced, Olympiads, College Math. 500+ students taught. 95% success rate.",
-      category: "tutors",
+      category: "tutoring",
       priceRange: "mid-range",
       averageRating: "4.9",
       totalRatings: 234,
@@ -629,7 +934,7 @@ class MemStorage implements IStorage {
       id: 6,
       name: "Dr. Priya - Computer Science Mentor",
       description: "FAANG experience. DSA, System Design, Interview Prep. Online and Offline classes.",
-      category: "tutors",
+      category: "tutoring",
       priceRange: "premium",
       averageRating: "4.8",
       totalRatings: 178,
@@ -644,7 +949,7 @@ class MemStorage implements IStorage {
       id: 7,
       name: "Tech Workshop: AI & Machine Learning",
       description: "Build your first AI model. Industry expert speakers. Certificate provided. Networking opportunities.",
-      category: "events",
+      category: "entertainment",
       address: "NIT Campus Auditorium",
       priceRange: "free",
       averageRating: "4.8",
@@ -657,7 +962,7 @@ class MemStorage implements IStorage {
       id: 8,
       name: "Annual Tech Fest - CodeMania 2024",
       description: "3-day coding competition. Hackathons, workshops, and networking sessions.",
-      category: "events",
+      category: "entertainment",
       address: "IIT Delhi Convention Center",
       priceRange: "budget",
       averageRating: "4.7",
@@ -673,7 +978,7 @@ class MemStorage implements IStorage {
       id: 9,
       name: "Campus Café & Study Space",
       description: "Great coffee & snacks. Quiet study environment. Power outlets at every table.",
-      category: "cafes",
+      category: "food",
       address: "Main Campus Building",
       priceRange: "budget",
       averageRating: "4.3",
@@ -687,7 +992,7 @@ class MemStorage implements IStorage {
       id: 10,
       name: "BookWorm Café",
       description: "Library café combo. Silent zones available. Free WiFi and charging points.",
-      category: "cafes",
+      category: "food",
       address: "University Library Ground Floor",
       priceRange: "budget",
       averageRating: "4.1",
@@ -731,7 +1036,7 @@ class MemStorage implements IStorage {
       id: 13,
       name: "FitZone Campus Gym",
       description: "Modern equipment. Personal training available. Student discounts offered.",
-      category: "fitness",
+      category: "services",
       address: "Campus Recreation Center",
       priceRange: "budget",
       averageRating: "4.2",
@@ -747,7 +1052,7 @@ class MemStorage implements IStorage {
       id: 14,
       name: "Academic Books Exchange",
       description: "Buy, sell, and rent textbooks. Wide collection of reference materials.",
-      category: "books",
+      category: "shopping",
       address: "Near Main Gate",
       priceRange: "budget",
       averageRating: "4.3",
@@ -764,6 +1069,17 @@ class MemStorage implements IStorage {
     const newVendor: Vendor = {
       id: this.vendorData.length + 1,
       ...vendor,
+      ownerId,
+      email: vendor.email || null,
+      phone: vendor.phone || null,
+      address: vendor.address || null,
+      latitude: vendor.latitude || null,
+      longitude: vendor.longitude || null,
+      website: vendor.website || null,
+      averageRating: vendor.averageRating || "0",
+      totalRatings: vendor.totalRatings || 0,
+      isVerified: vendor.isVerified || false,
+      isActive: vendor.isActive !== false,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -838,11 +1154,70 @@ class MemStorage implements IStorage {
     return [];
   }
 
+  // Accommodation operations - placeholder implementations for demo
+  async getAccommodations(filters?: {
+    college?: string;
+    distance?: number;
+    accommodationType?: string;
+    genderPreference?: string;
+    amenities?: string[];
+    priceRange?: { min?: number; max?: number };
+    roomType?: string;
+    rating?: number;
+    searchTerm?: string;
+    limit?: number;
+    offset?: number;
+    sortBy?: string;
+  }): Promise<{ accommodations: any[]; total: number }> {
+    // Return empty for demo
+    return { accommodations: [], total: 0 };
+  }
+
+  async getAccommodationById(id: number): Promise<any> {
+    return undefined;
+  }
+
+  async createAccommodation(accommodationData: InsertAccommodation): Promise<Accommodation> {
+    throw new Error('Not implemented in demo');
+  }
+
+  async createAccommodationRoom(roomData: InsertAccommodationRoom): Promise<AccommodationRoom> {
+    throw new Error('Not implemented in demo');
+  }
+
+  async saveAccommodation(savedAccommodationData: InsertSavedAccommodation): Promise<SavedAccommodation> {
+    throw new Error('Not implemented in demo');
+  }
+
+  async unsaveAccommodation(accommodationId: number, userId: string): Promise<void> {
+    // No-op for demo
+  }
+
+  async getUserSavedAccommodations(userId: string): Promise<any[]> {
+    return [];
+  }
+
+  async scheduleAccommodationVisit(visitData: InsertAccommodationVisit): Promise<AccommodationVisit> {
+    throw new Error('Not implemented in demo');
+  }
+
+  async bookAccommodation(bookingData: InsertAccommodationBooking): Promise<AccommodationBooking> {
+    throw new Error('Not implemented in demo');
+  }
+
   // All other methods - placeholder implementations for demo
   async getUser(id: string): Promise<User | undefined> { return undefined; }
   async upsertUser(user: UpsertUser): Promise<User> { throw new Error('Not implemented in demo'); }
   async createNote(note: InsertNote, uploaderId: string): Promise<Note> { throw new Error('Not implemented in demo'); }
-  async getNotes(): Promise<{ notes: Note[]; total: number }> { return { notes: [], total: 0 }; }
+  async getNotes(filters?: {
+    subject?: string;
+    university?: string;
+    contentType?: string;
+    searchTerm?: string;
+    limit?: number;
+    offset?: number;
+    sortBy?: 'popular' | 'recent' | 'rating';
+  }): Promise<{ notes: Note[]; total: number }> { return { notes: [], total: 0 }; }
   async getNoteById(id: number): Promise<Note | undefined> { return undefined; }
   async getNoteWithDetails(id: number): Promise<any> { return null; }
   async updateNoteViews(id: number): Promise<void> {}

@@ -29,6 +29,7 @@ import AuthCallback from "@/pages/auth/callback";
 import SignIn from "@/pages/signin";
 import HowItWorks from "@/pages/how-it-works";
 import BrowseServices from "@/pages/browse-services";
+import Accommodations from "@/pages/accommodations";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -40,6 +41,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/how-it-works" component={HowItWorks} />
           <Route path="/browse-services" component={BrowseServices} />
+          <Route path="/accommodations" component={Accommodations} />
           <Route path="/vendors" component={Vendors} />
           <Route path="/signin" component={SignIn} />
           <Route path="/auth-demo" component={AuthDemo} />
@@ -54,6 +56,7 @@ function Router() {
           <Route path="/browse" component={BrowseNotes} />
           <Route path="/notes/:id" component={NoteDetail} />
           <Route path="/browse-services" component={BrowseServices} />
+          <Route path="/accommodations" component={Accommodations} />
           <Route path="/vendors" component={Vendors} />
           <Route path="/admin" component={Admin} />
           <Route path="/study-groups" component={StudyGroups} />

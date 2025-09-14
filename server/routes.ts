@@ -4,7 +4,7 @@ import multer from "multer";
 import path from "path";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertNoteSchema, insertNoteFileSchema, insertNoteRatingSchema, insertNoteCommentSchema, insertVendorSchema, insertVendorRatingSchema, insertSavedNoteSchema, insertAdvertisementSchema } from "@shared/schema";
+import { insertNoteSchema, insertNoteFileSchema, insertNoteRatingSchema, insertNoteCommentSchema, insertVendorSchema, insertVendorRatingSchema, insertSavedNoteSchema, insertAdvertisementSchema, insertAccommodationSchema, insertAccommodationRoomSchema, insertSavedAccommodationSchema, insertAccommodationVisitSchema, insertAccommodationBookingSchema } from "@shared/schema";
 import fs from "fs/promises";
 
 // Configure multer for file uploads
@@ -179,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingRating = await storage.getUserNoteRating(noteId, userId);
       
       if (existingRating) {
-        await storage.updateNoteRating(existingRating.id, ratingData.rating, ratingData.review);
+        await storage.updateNoteRating(existingRating.id, ratingData.rating, ratingData.review || undefined);
         res.json({ message: "Rating updated successfully" });
       } else {
         const rating = await storage.addNoteRating(ratingData);
@@ -357,6 +357,167 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error adding vendor rating:", error);
       res.status(500).json({ message: "Failed to add vendor rating" });
+    }
+  });
+
+  // Accommodations routes
+  app.get('/api/accommodations', async (req, res) => {
+    try {
+      const filters: {
+        college?: string;
+        distance?: number;
+        accommodationType?: string;
+        genderPreference?: string;
+        amenities?: string[];
+        priceRange?: { min?: number; max?: number };
+        roomType?: string;
+        rating?: number;
+        searchTerm?: string;
+        limit?: number;
+        offset?: number;
+        sortBy?: string;
+      } = {
+        college: req.query.college as string,
+        distance: req.query.distance ? parseInt(req.query.distance as string) : undefined,
+        accommodationType: req.query.accommodationType as string,
+        genderPreference: req.query.genderPreference as string,
+        roomType: req.query.roomType as string,
+        rating: req.query.rating ? parseFloat(req.query.rating as string) : undefined,
+        searchTerm: req.query.search as string,
+        limit: parseInt(req.query.limit as string) || 20,
+        offset: parseInt(req.query.offset as string) || 0,
+        sortBy: req.query.sortBy as string || 'recent',
+      };
+
+      // Parse amenities array
+      if (req.query.amenities) {
+        if (Array.isArray(req.query.amenities)) {
+          filters.amenities = req.query.amenities as string[];
+        } else {
+          filters.amenities = [req.query.amenities as string];
+        }
+      }
+
+      // Parse price range
+      if (req.query.minPrice || req.query.maxPrice) {
+        filters.priceRange = {};
+        if (req.query.minPrice) {
+          filters.priceRange.min = parseFloat(req.query.minPrice as string);
+        }
+        if (req.query.maxPrice) {
+          filters.priceRange.max = parseFloat(req.query.maxPrice as string);
+        }
+      }
+
+      const result = await storage.getAccommodations(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching accommodations:", error);
+      res.status(500).json({ message: "Failed to fetch accommodations" });
+    }
+  });
+
+  app.get('/api/accommodations/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const accommodation = await storage.getAccommodationById(id);
+      
+      if (!accommodation) {
+        return res.status(404).json({ message: "Accommodation not found" });
+      }
+      
+      res.json(accommodation);
+    } catch (error) {
+      console.error("Error fetching accommodation:", error);
+      res.status(500).json({ message: "Failed to fetch accommodation" });
+    }
+  });
+
+  app.post('/api/accommodations', isAuthenticated, async (req: any, res) => {
+    try {
+      const accommodationData = insertAccommodationSchema.parse(req.body);
+      const accommodation = await storage.createAccommodation(accommodationData);
+      res.status(201).json(accommodation);
+    } catch (error) {
+      console.error("Error creating accommodation:", error);
+      res.status(500).json({ message: "Failed to create accommodation" });
+    }
+  });
+
+  app.post('/api/accommodations/:id/rooms', isAuthenticated, async (req: any, res) => {
+    try {
+      const accommodationId = parseInt(req.params.id);
+      const roomData = insertAccommodationRoomSchema.parse({ ...req.body, accommodationId });
+      const room = await storage.createAccommodationRoom(roomData);
+      res.status(201).json(room);
+    } catch (error) {
+      console.error("Error creating accommodation room:", error);
+      res.status(500).json({ message: "Failed to create accommodation room" });
+    }
+  });
+
+  // Saved accommodations routes
+  app.get('/api/saved-accommodations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const savedAccommodations = await storage.getUserSavedAccommodations(userId);
+      res.json(savedAccommodations);
+    } catch (error) {
+      console.error("Error fetching saved accommodations:", error);
+      res.status(500).json({ message: "Failed to fetch saved accommodations" });
+    }
+  });
+
+  app.post('/api/accommodations/:id/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const accommodationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const savedAccommodation = await storage.saveAccommodation({ accommodationId, userId });
+      res.status(201).json(savedAccommodation);
+    } catch (error) {
+      console.error("Error saving accommodation:", error);
+      res.status(500).json({ message: "Failed to save accommodation" });
+    }
+  });
+
+  app.delete('/api/accommodations/:id/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const accommodationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.unsaveAccommodation(accommodationId, userId);
+      res.json({ message: "Accommodation unsaved successfully" });
+    } catch (error) {
+      console.error("Error unsaving accommodation:", error);
+      res.status(500).json({ message: "Failed to unsave accommodation" });
+    }
+  });
+
+  // Accommodation visits and bookings routes
+  app.post('/api/accommodations/visits', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const visitData = insertAccommodationVisitSchema.parse({ ...req.body, userId });
+      
+      const visit = await storage.scheduleAccommodationVisit(visitData);
+      res.status(201).json(visit);
+    } catch (error) {
+      console.error("Error scheduling accommodation visit:", error);
+      res.status(500).json({ message: "Failed to schedule accommodation visit" });
+    }
+  });
+
+  app.post('/api/accommodations/bookings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const bookingData = insertAccommodationBookingSchema.parse({ ...req.body, userId });
+      
+      const booking = await storage.bookAccommodation(bookingData);
+      res.status(201).json(booking);
+    } catch (error) {
+      console.error("Error booking accommodation:", error);
+      res.status(500).json({ message: "Failed to book accommodation" });
     }
   });
 
