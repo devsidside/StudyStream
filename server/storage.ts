@@ -13,6 +13,11 @@ import {
   savedAccommodations,
   accommodationVisits,
   accommodationBookings,
+  tutors,
+  tutorRatings,
+  tutorSessions,
+  tutorAvailabilitySlots,
+  savedTutors,
   type User,
   type UpsertUser,
   type InsertNote,
@@ -41,9 +46,22 @@ import {
   type AccommodationVisit,
   type InsertAccommodationBooking,
   type AccommodationBooking,
+  type InsertTutor,
+  type Tutor,
+  type InsertTutorRating,
+  type TutorRating,
+  type InsertTutorSession,
+  type TutorSession,
+  type InsertTutorAvailabilitySlot,
+  type TutorAvailabilitySlot,
+  type InsertSavedTutor,
+  type SavedTutor,
+  type TutorSearchFilters,
+  type TutorSearchResult,
+  type TutorWithDetails,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, asc, like, and, or, sql, count, avg } from "drizzle-orm";
+import { eq, desc, asc, like, and, or, sql, count, avg, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -142,6 +160,50 @@ export interface IStorage {
   getTrendingNotes(limit?: number): Promise<Note[]>;
   getRecentNotes(limit?: number): Promise<Note[]>;
   getSubjectStats(): Promise<{ subject: string; count: number }[]>;
+
+  // Tutor operations
+  createTutor(tutor: InsertTutor): Promise<Tutor>;
+  getTutors(filters?: TutorSearchFilters): Promise<TutorSearchResult>;
+  getTutorById(id: number): Promise<TutorWithDetails | undefined>;
+  updateTutor(id: number, tutor: Partial<InsertTutor>, userId: string): Promise<boolean>;
+  deleteTutor(id: number, userId: string): Promise<boolean>;
+  getTutorsByUserId(userId: string): Promise<Tutor[]>;
+
+  // Tutor availability operations
+  addTutorAvailabilitySlot(slot: InsertTutorAvailabilitySlot): Promise<TutorAvailabilitySlot>;
+  getTutorAvailabilitySlots(tutorId: number): Promise<TutorAvailabilitySlot[]>;
+  updateTutorAvailabilitySlot(id: number, slot: Partial<InsertTutorAvailabilitySlot>, userId: string): Promise<boolean>;
+  deleteTutorAvailabilitySlot(id: number, tutorId: number, userId: string): Promise<boolean>;
+
+  // Tutor rating operations
+  addTutorRating(rating: InsertTutorRating): Promise<TutorRating>;
+  getTutorRatings(tutorId: number): Promise<TutorRating[]>;
+  getUserTutorRating(tutorId: number, userId: string): Promise<TutorRating | undefined>;
+  updateTutorRating(id: number, rating: number, review?: string): Promise<void>;
+
+  // Tutor session operations
+  createTutorSession(session: InsertTutorSession): Promise<TutorSession>;
+  getTutorSessions(filters?: {
+    tutorId?: number;
+    studentId?: string;
+    status?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<TutorSession[]>;
+  getTutorSessionById(id: number): Promise<TutorSession | undefined>;
+  updateTutorSession(id: number, session: Partial<InsertTutorSession>): Promise<boolean>;
+  cancelTutorSession(id: number, userId: string): Promise<boolean>;
+
+  // Saved tutors operations
+  saveTutor(savedTutor: InsertSavedTutor): Promise<SavedTutor>;
+  unsaveTutor(tutorId: number, userId: string): Promise<void>;
+  getUserSavedTutors(userId: string): Promise<TutorWithDetails[]>;
+  isTutorSaved(tutorId: number, userId: string): Promise<boolean>;
+
+  // Tutor categories and analytics
+  getTutorCategories(): Promise<TutorSearchResult['categories']>;
+  getFeaturedTutors(limit?: number): Promise<TutorWithDetails[]>;
+  getTopRatedTutors(limit?: number): Promise<TutorWithDetails[]>;
 }
 
 // Category mapping for vendor categories
@@ -855,6 +917,592 @@ export class DatabaseStorage implements IStorage {
       .where(eq(accommodations.id, bookingData.accommodationId));
 
     return booking;
+  }
+
+  // Tutor operations
+  async createTutor(tutor: InsertTutor): Promise<Tutor> {
+    const [newTutor] = await db.insert(tutors).values(tutor).returning();
+    return newTutor;
+  }
+
+  async getTutors(filters?: TutorSearchFilters): Promise<TutorSearchResult> {
+    const limit = filters?.limit || 20;
+    const offset = filters?.offset || 0;
+
+    // Build base query with joins
+    let query = db
+      .select({
+        tutor: tutors,
+        user: users,
+        avgRating: avg(tutorRatings.rating),
+        ratingCount: count(tutorRatings.id),
+      })
+      .from(tutors)
+      .leftJoin(users, eq(tutors.userId, users.id))
+      .leftJoin(tutorRatings, eq(tutors.id, tutorRatings.tutorId))
+      .where(eq(tutors.isActive, true))
+      .groupBy(tutors.id, users.id);
+
+    let countQuery = db
+      .select({ count: sql`count(distinct ${tutors.id})`.as('count') })
+      .from(tutors)
+      .where(eq(tutors.isActive, true));
+
+    const conditions = [eq(tutors.isActive, true)];
+
+    // Apply filters
+    if (filters?.subjects && filters.subjects.length > 0) {
+      conditions.push(sql`${tutors.subjects} && ARRAY[${filters.subjects.join(',')}]`);
+    }
+
+    if (filters?.minPrice !== undefined) {
+      conditions.push(sql`${tutors.hourlyRate} >= ${filters.minPrice}`);
+    }
+
+    if (filters?.maxPrice !== undefined) {
+      conditions.push(sql`${tutors.hourlyRate} <= ${filters.maxPrice}`);
+    }
+
+    if (filters?.mode && filters.mode.length > 0) {
+      conditions.push(sql`${tutors.mode} = ANY(ARRAY[${filters.mode.join(',')}])`);
+    }
+
+    if (filters?.availability && filters.availability.length > 0) {
+      conditions.push(sql`${tutors.availability} && ARRAY[${filters.availability.join(',')}]`);
+    }
+
+    if (filters?.specializations && filters.specializations.length > 0) {
+      conditions.push(sql`${tutors.specializations} && ARRAY[${filters.specializations.join(',')}]`);
+    }
+
+    if (filters?.minRating !== undefined) {
+      conditions.push(sql`${tutors.averageRating}::decimal >= ${filters.minRating}`);
+    }
+
+    if (filters?.institutionType && filters.institutionType.length > 0) {
+      conditions.push(sql`${tutors.institutionType} = ANY(ARRAY[${filters.institutionType.join(',')}])`);
+    }
+
+    if (filters?.languages && filters.languages.length > 0) {
+      conditions.push(sql`${tutors.languages} && ARRAY[${filters.languages.join(',')}]`);
+    }
+
+    if (filters?.isVerified !== undefined) {
+      conditions.push(eq(tutors.isVerified, filters.isVerified));
+    }
+
+    if (filters?.isFeatured !== undefined) {
+      conditions.push(eq(tutors.isFeatured, filters.isFeatured));
+    }
+
+    if (filters?.query) {
+      conditions.push(
+        or(
+          like(users.firstName, `%${filters.query}%`),
+          like(users.lastName, `%${filters.query}%`),
+          like(tutors.bio, `%${filters.query}%`),
+          like(tutors.institution, `%${filters.query}%`),
+          sql`${tutors.tags} && ARRAY[${filters.query}]`
+        )
+      );
+    }
+
+    if (conditions.length > 1) {
+      const whereCondition = and(...conditions);
+      query = query.where(whereCondition) as any;
+      countQuery = countQuery.where(whereCondition) as any;
+    }
+
+    // Apply sorting
+    if (filters?.sortBy === 'rating') {
+      query = query.orderBy(desc(tutors.averageRating)) as any;
+    } else if (filters?.sortBy === 'price_low') {
+      query = query.orderBy(asc(tutors.hourlyRate)) as any;
+    } else if (filters?.sortBy === 'price_high') {
+      query = query.orderBy(desc(tutors.hourlyRate)) as any;
+    } else if (filters?.sortBy === 'experience') {
+      query = query.orderBy(desc(tutors.experience)) as any;
+    } else {
+      query = query.orderBy(desc(tutors.createdAt)) as any;
+    }
+
+    const [tutorsResult, totalResult] = await Promise.all([
+      query.limit(limit).offset(offset),
+      countQuery
+    ]);
+
+    // Get detailed tutor data with relations
+    const tutorIds = tutorsResult.map(t => t.tutor.id);
+    const [ratings, slots] = await Promise.all([
+      tutorIds.length > 0 ? db.select().from(tutorRatings).where(inArray(tutorRatings.tutorId, tutorIds)) : [],
+      tutorIds.length > 0 ? db.select().from(tutorAvailabilitySlots).where(inArray(tutorAvailabilitySlots.tutorId, tutorIds)) : []
+    ]);
+
+    const tutorsWithDetails: TutorWithDetails[] = tutorsResult.map(result => ({
+      ...result.tutor,
+      user: result.user || undefined,
+      ratings: ratings.filter(r => r.tutorId === result.tutor.id),
+      availabilitySlots: slots.filter(s => s.tutorId === result.tutor.id),
+      upcomingSlots: slots
+        .filter(s => s.tutorId === result.tutor.id && !s.isBooked)
+        .map(s => `${s.dayOfWeek}:${s.startTime}-${s.endTime}`)
+    }));
+
+    // Calculate categories
+    const categories = {
+      examPrep: tutorsWithDetails.filter(t => 
+        t.specializations?.some(s => ['jee-advanced', 'jee-main', 'neet', 'gate'].includes(s))
+      ).length,
+      tech: tutorsWithDetails.filter(t => 
+        t.subjects?.includes('computer-science') || 
+        t.specializations?.some(s => ['dsa', 'system-design', 'interview-prep'].includes(s))
+      ).length,
+      languages: tutorsWithDetails.filter(t => 
+        t.subjects?.includes('literature') || t.languages?.length > 1
+      ).length,
+      skills: tutorsWithDetails.filter(t => 
+        t.specializations?.some(s => ['placement-prep', 'interview-prep'].includes(s))
+      ).length,
+    };
+
+    return {
+      tutors: tutorsWithDetails,
+      total: totalResult[0]?.count || 0,
+      categories
+    };
+  }
+
+  async getTutorById(id: number): Promise<TutorWithDetails | undefined> {
+    const [tutorData] = await db
+      .select({
+        tutor: tutors,
+        user: users,
+      })
+      .from(tutors)
+      .leftJoin(users, eq(tutors.userId, users.id))
+      .where(eq(tutors.id, id));
+
+    if (!tutorData) return undefined;
+
+    const [ratings, slots] = await Promise.all([
+      db.select().from(tutorRatings).where(eq(tutorRatings.tutorId, id)),
+      db.select().from(tutorAvailabilitySlots).where(eq(tutorAvailabilitySlots.tutorId, id))
+    ]);
+
+    return {
+      ...tutorData.tutor,
+      user: tutorData.user || undefined,
+      ratings,
+      availabilitySlots: slots,
+      upcomingSlots: slots
+        .filter(s => !s.isBooked)
+        .map(s => `${s.dayOfWeek}:${s.startTime}-${s.endTime}`)
+    };
+  }
+
+  async updateTutor(id: number, tutor: Partial<InsertTutor>, userId: string): Promise<boolean> {
+    const result = await db
+      .update(tutors)
+      .set({ ...tutor, updatedAt: new Date() })
+      .where(and(eq(tutors.id, id), eq(tutors.userId, userId)))
+      .returning();
+    return result.length > 0;
+  }
+
+  async deleteTutor(id: number, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(tutors)
+      .where(and(eq(tutors.id, id), eq(tutors.userId, userId)))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getTutorsByUserId(userId: string): Promise<Tutor[]> {
+    return await db.select().from(tutors).where(eq(tutors.userId, userId));
+  }
+
+  // Tutor availability operations
+  async addTutorAvailabilitySlot(slot: InsertTutorAvailabilitySlot): Promise<TutorAvailabilitySlot> {
+    const [newSlot] = await db.insert(tutorAvailabilitySlots).values(slot).returning();
+    return newSlot;
+  }
+
+  async getTutorAvailabilitySlots(tutorId: number): Promise<TutorAvailabilitySlot[]> {
+    return await db
+      .select()
+      .from(tutorAvailabilitySlots)
+      .where(eq(tutorAvailabilitySlots.tutorId, tutorId))
+      .orderBy(tutorAvailabilitySlots.dayOfWeek, tutorAvailabilitySlots.startTime);
+  }
+
+  async updateTutorAvailabilitySlot(id: number, slot: Partial<InsertTutorAvailabilitySlot>, userId: string): Promise<boolean> {
+    // First verify the slot belongs to a tutor owned by the user
+    const result = await db
+      .update(tutorAvailabilitySlots)
+      .set(slot)
+      .where(
+        and(
+          eq(tutorAvailabilitySlots.id, id),
+          sql`${tutorAvailabilitySlots.tutorId} IN (SELECT id FROM ${tutors} WHERE ${tutors.userId} = ${userId})`
+        )
+      )
+      .returning();
+    return result.length > 0;
+  }
+
+  async deleteTutorAvailabilitySlot(id: number, tutorId: number, userId: string): Promise<boolean> {
+    // First verify the tutor belongs to the user
+    const result = await db
+      .delete(tutorAvailabilitySlots)
+      .where(
+        and(
+          eq(tutorAvailabilitySlots.id, id),
+          eq(tutorAvailabilitySlots.tutorId, tutorId),
+          sql`${tutorId} IN (SELECT id FROM ${tutors} WHERE ${tutors.userId} = ${userId})`
+        )
+      )
+      .returning();
+    return result.length > 0;
+  }
+
+  // Tutor rating operations
+  async addTutorRating(rating: InsertTutorRating): Promise<TutorRating> {
+    const [newRating] = await db.insert(tutorRatings).values(rating).returning();
+    
+    // Update tutor's average rating
+    await this.updateTutorAverageRating(rating.tutorId);
+    
+    return newRating;
+  }
+
+  async getTutorRatings(tutorId: number): Promise<TutorRating[]> {
+    return await db
+      .select()
+      .from(tutorRatings)
+      .leftJoin(users, eq(tutorRatings.userId, users.id))
+      .where(eq(tutorRatings.tutorId, tutorId))
+      .orderBy(desc(tutorRatings.createdAt)) as any;
+  }
+
+  async getUserTutorRating(tutorId: number, userId: string): Promise<TutorRating | undefined> {
+    const [rating] = await db
+      .select()
+      .from(tutorRatings)
+      .where(and(eq(tutorRatings.tutorId, tutorId), eq(tutorRatings.userId, userId)));
+    return rating;
+  }
+
+  async updateTutorRating(id: number, rating: number, review?: string): Promise<void> {
+    const updateData: any = { rating };
+    if (review !== undefined) updateData.review = review;
+    
+    await db.update(tutorRatings).set(updateData).where(eq(tutorRatings.id, id));
+    
+    // Get the tutor ID to update average rating
+    const [ratingRecord] = await db.select().from(tutorRatings).where(eq(tutorRatings.id, id));
+    if (ratingRecord) {
+      await this.updateTutorAverageRating(ratingRecord.tutorId);
+    }
+  }
+
+  private async updateTutorAverageRating(tutorId: number): Promise<void> {
+    const [stats] = await db
+      .select({
+        avg: avg(tutorRatings.rating),
+        count: count(tutorRatings.id),
+      })
+      .from(tutorRatings)
+      .where(eq(tutorRatings.tutorId, tutorId));
+
+    await db
+      .update(tutors)
+      .set({
+        averageRating: stats.avg ? stats.avg.toString() : "0",
+        totalRatings: stats.count,
+      })
+      .where(eq(tutors.id, tutorId));
+  }
+
+  // Tutor session operations
+  async createTutorSession(session: InsertTutorSession): Promise<TutorSession> {
+    return await db.transaction(async (tx) => {
+      // First validate that the slot belongs to the same tutor if slotId is provided
+      if (session.slotId) {
+        const [slot] = await tx
+          .select()
+          .from(tutorAvailabilitySlots)
+          .where(
+            and(
+              eq(tutorAvailabilitySlots.id, session.slotId),
+              eq(tutorAvailabilitySlots.tutorId, session.tutorId)
+            )
+          )
+          .for('update'); // Row-level lock to prevent concurrent booking
+
+        if (!slot) {
+          throw new Error('Invalid slot ID or slot does not belong to this tutor');
+        }
+
+        if (slot.isBooked) {
+          throw new Error('Slot is already booked');
+        }
+
+        // Mark the slot as booked atomically
+        await tx
+          .update(tutorAvailabilitySlots)
+          .set({ isBooked: true })
+          .where(eq(tutorAvailabilitySlots.id, session.slotId));
+      }
+
+      // Create the session
+      const [newSession] = await tx.insert(tutorSessions).values(session).returning();
+      
+      // Update tutor's total sessions count
+      await tx
+        .update(tutors)
+        .set({ totalSessions: sql`${tutors.totalSessions} + 1` })
+        .where(eq(tutors.id, session.tutorId));
+      
+      return newSession;
+    });
+  }
+
+  async getTutorSessions(filters?: {
+    tutorId?: number;
+    studentId?: string;
+    status?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<TutorSession[]> {
+    let query = db.select().from(tutorSessions) as any;
+    
+    const conditions = [];
+    
+    if (filters?.tutorId) {
+      conditions.push(eq(tutorSessions.tutorId, filters.tutorId));
+    }
+    
+    if (filters?.studentId) {
+      conditions.push(eq(tutorSessions.studentId, filters.studentId));
+    }
+    
+    if (filters?.status) {
+      conditions.push(eq(tutorSessions.status, filters.status));
+    }
+    
+    if (filters?.startDate) {
+      conditions.push(sql`${tutorSessions.sessionDate} >= ${filters.startDate}`);
+    }
+    
+    if (filters?.endDate) {
+      conditions.push(sql`${tutorSessions.sessionDate} <= ${filters.endDate}`);
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    return await query.orderBy(desc(tutorSessions.sessionDate));
+  }
+
+  async getTutorSessionById(id: number): Promise<TutorSession | undefined> {
+    const [session] = await db.select().from(tutorSessions).where(eq(tutorSessions.id, id));
+    return session;
+  }
+
+  async updateTutorSession(id: number, session: Partial<InsertTutorSession>): Promise<boolean> {
+    const result = await db
+      .update(tutorSessions)
+      .set({ ...session, updatedAt: new Date() })
+      .where(eq(tutorSessions.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async cancelTutorSession(id: number, userId: string): Promise<boolean> {
+    return await db.transaction(async (tx) => {
+      // First check if user has permission (either tutor or student) and get session details
+      const [sessionData] = await tx
+        .select({
+          session: tutorSessions,
+          tutor: tutors
+        })
+        .from(tutorSessions)
+        .leftJoin(tutors, eq(tutorSessions.tutorId, tutors.id))
+        .where(
+          and(
+            eq(tutorSessions.id, id),
+            or(
+              eq(tutorSessions.studentId, userId),
+              eq(tutors.userId, userId)
+            )
+          )
+        )
+        .for('update'); // Lock the session to prevent concurrent modifications
+      
+      if (!sessionData || !sessionData.session) return false;
+      
+      // Cancel the session
+      const result = await tx
+        .update(tutorSessions)
+        .set({ status: 'cancelled', updatedAt: new Date() })
+        .where(eq(tutorSessions.id, id))
+        .returning();
+      
+      // Atomically free up the slot if it was booked
+      if (result.length > 0 && sessionData.session.slotId) {
+        await tx
+          .update(tutorAvailabilitySlots)
+          .set({ isBooked: false })
+          .where(eq(tutorAvailabilitySlots.id, sessionData.session.slotId));
+      }
+      
+      return result.length > 0;
+    });
+  }
+
+  // Saved tutors operations
+  async saveTutor(savedTutor: InsertSavedTutor): Promise<SavedTutor> {
+    const [newSavedTutor] = await db
+      .insert(savedTutors)
+      .values(savedTutor)
+      .onConflictDoNothing()
+      .returning();
+    return newSavedTutor;
+  }
+
+  async unsaveTutor(tutorId: number, userId: string): Promise<void> {
+    await db
+      .delete(savedTutors)
+      .where(and(eq(savedTutors.tutorId, tutorId), eq(savedTutors.userId, userId)));
+  }
+
+  async getUserSavedTutors(userId: string): Promise<TutorWithDetails[]> {
+    const savedTutorResults = await db
+      .select({
+        tutor: tutors,
+        user: users,
+      })
+      .from(savedTutors)
+      .leftJoin(tutors, eq(savedTutors.tutorId, tutors.id))
+      .leftJoin(users, eq(tutors.userId, users.id))
+      .where(eq(savedTutors.userId, userId))
+      .orderBy(desc(savedTutors.savedAt));
+
+    const tutorIds = savedTutorResults.map(result => result.tutor?.id).filter(Boolean);
+    
+    if (tutorIds.length === 0) return [];
+    
+    const [ratings, slots] = await Promise.all([
+      db.select().from(tutorRatings).where(inArray(tutorRatings.tutorId, tutorIds)),
+      db.select().from(tutorAvailabilitySlots).where(inArray(tutorAvailabilitySlots.tutorId, tutorIds))
+    ]);
+
+    return savedTutorResults
+      .filter(result => result.tutor)
+      .map(result => ({
+        ...result.tutor!,
+        user: result.user || undefined,
+        ratings: ratings.filter(r => r.tutorId === result.tutor!.id),
+        availabilitySlots: slots.filter(s => s.tutorId === result.tutor!.id),
+        isSaved: true,
+        upcomingSlots: slots
+          .filter(s => s.tutorId === result.tutor!.id && !s.isBooked)
+          .map(s => `${s.dayOfWeek}:${s.startTime}-${s.endTime}`)
+      }));
+  }
+
+  async isTutorSaved(tutorId: number, userId: string): Promise<boolean> {
+    const [saved] = await db
+      .select()
+      .from(savedTutors)
+      .where(and(eq(savedTutors.tutorId, tutorId), eq(savedTutors.userId, userId)));
+    return !!saved;
+  }
+
+  // Tutor categories and analytics
+  async getTutorCategories(): Promise<TutorSearchResult['categories']> {
+    const allTutors = await db.select().from(tutors).where(eq(tutors.isActive, true));
+    
+    return {
+      examPrep: allTutors.filter(t => 
+        t.specializations?.some(s => ['jee-advanced', 'jee-main', 'neet', 'gate'].includes(s))
+      ).length,
+      tech: allTutors.filter(t => 
+        t.subjects?.includes('computer-science') || 
+        t.specializations?.some(s => ['dsa', 'system-design', 'interview-prep'].includes(s))
+      ).length,
+      languages: allTutors.filter(t => 
+        t.subjects?.includes('literature') || (t.languages?.length || 0) > 1
+      ).length,
+      skills: allTutors.filter(t => 
+        t.specializations?.some(s => ['placement-prep', 'interview-prep'].includes(s))
+      ).length,
+    };
+  }
+
+  async getFeaturedTutors(limit: number = 10): Promise<TutorWithDetails[]> {
+    const featuredTutorResults = await db
+      .select({
+        tutor: tutors,
+        user: users,
+      })
+      .from(tutors)
+      .leftJoin(users, eq(tutors.userId, users.id))
+      .where(and(eq(tutors.isActive, true), eq(tutors.isFeatured, true)))
+      .orderBy(desc(tutors.averageRating))
+      .limit(limit);
+
+    const tutorIds = featuredTutorResults.map(result => result.tutor.id);
+    
+    if (tutorIds.length === 0) return [];
+    
+    const [ratings, slots] = await Promise.all([
+      db.select().from(tutorRatings).where(inArray(tutorRatings.tutorId, tutorIds)),
+      db.select().from(tutorAvailabilitySlots).where(inArray(tutorAvailabilitySlots.tutorId, tutorIds))
+    ]);
+
+    return featuredTutorResults.map(result => ({
+      ...result.tutor,
+      user: result.user || undefined,
+      ratings: ratings.filter(r => r.tutorId === result.tutor.id),
+      availabilitySlots: slots.filter(s => s.tutorId === result.tutor.id),
+      upcomingSlots: slots
+        .filter(s => s.tutorId === result.tutor.id && !s.isBooked)
+        .map(s => `${s.dayOfWeek}:${s.startTime}-${s.endTime}`)
+    }));
+  }
+
+  async getTopRatedTutors(limit: number = 10): Promise<TutorWithDetails[]> {
+    const topRatedTutorResults = await db
+      .select({
+        tutor: tutors,
+        user: users,
+      })
+      .from(tutors)
+      .leftJoin(users, eq(tutors.userId, users.id))
+      .where(eq(tutors.isActive, true))
+      .orderBy(desc(tutors.averageRating), desc(tutors.totalRatings))
+      .limit(limit);
+
+    const tutorIds = topRatedTutorResults.map(result => result.tutor.id);
+    
+    if (tutorIds.length === 0) return [];
+    
+    const [ratings, slots] = await Promise.all([
+      db.select().from(tutorRatings).where(inArray(tutorRatings.tutorId, tutorIds)),
+      db.select().from(tutorAvailabilitySlots).where(inArray(tutorAvailabilitySlots.tutorId, tutorIds))
+    ]);
+
+    return topRatedTutorResults.map(result => ({
+      ...result.tutor,
+      user: result.user || undefined,
+      ratings: ratings.filter(r => r.tutorId === result.tutor.id),
+      availabilitySlots: slots.filter(s => s.tutorId === result.tutor.id),
+      upcomingSlots: slots
+        .filter(s => s.tutorId === result.tutor.id && !s.isBooked)
+        .map(s => `${s.dayOfWeek}:${s.startTime}-${s.endTime}`)
+    }));
   }
 }
 
