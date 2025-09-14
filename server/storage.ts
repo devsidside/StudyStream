@@ -1894,13 +1894,14 @@ class MemStorage implements IStorage {
   async getSubjectStats(): Promise<{ subject: string; count: number }[]> { return []; }
 }
 
-// Use MemStorage for demo when database is not available
+// Use DatabaseStorage when available, fallback to MemStorage for demo
 let storageInstance: IStorage;
 try {
   storageInstance = new DatabaseStorage();
+  console.log('Using DatabaseStorage with PostgreSQL');
 } catch (error) {
   console.log('Database not available, using MemStorage for demo');
   storageInstance = new MemStorage();
 }
 
-export const storage = new MemStorage();
+export const storage = storageInstance;

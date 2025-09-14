@@ -4,7 +4,7 @@ import multer from "multer";
 import path from "path";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertNoteSchema, insertNoteFileSchema, insertNoteRatingSchema, insertNoteCommentSchema, insertVendorSchema, insertVendorRatingSchema, insertSavedNoteSchema, insertAdvertisementSchema, insertAccommodationSchema, insertAccommodationRoomSchema, insertSavedAccommodationSchema, insertAccommodationVisitSchema, insertAccommodationBookingSchema } from "@shared/schema";
+import { insertNoteSchema, insertNoteFileSchema, insertNoteRatingSchema, insertNoteCommentSchema, insertVendorSchema, insertVendorRatingSchema, insertSavedNoteSchema, insertAdvertisementSchema, insertAccommodationSchema, insertAccommodationRoomSchema, insertSavedAccommodationSchema, insertAccommodationVisitSchema, insertAccommodationBookingSchema, insertTutorSchema, insertTutorRatingSchema, insertTutorSessionSchema, insertTutorAvailabilitySlotSchema, insertSavedTutorSchema, type TutorSearchFilters } from "@shared/schema";
 import fs from "fs/promises";
 
 // Configure multer for file uploads
@@ -518,6 +518,422 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error booking accommodation:", error);
       res.status(500).json({ message: "Failed to book accommodation" });
+    }
+  });
+
+  // Tutors routes
+  app.get('/api/tutors', async (req, res) => {
+    try {
+      const filters: TutorSearchFilters = {
+        subjects: req.query.subjects ? (Array.isArray(req.query.subjects) ? req.query.subjects as string[] : [req.query.subjects as string]) : undefined,
+        minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
+        maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
+        mode: req.query.mode ? (Array.isArray(req.query.mode) ? req.query.mode as any[] : [req.query.mode as any]) : undefined,
+        availability: req.query.availability ? (Array.isArray(req.query.availability) ? req.query.availability as any[] : [req.query.availability as any]) : undefined,
+        specializations: req.query.specializations ? (Array.isArray(req.query.specializations) ? req.query.specializations as any[] : [req.query.specializations as any]) : undefined,
+        minRating: req.query.minRating ? parseFloat(req.query.minRating as string) : undefined,
+        institutionType: req.query.institutionType ? (Array.isArray(req.query.institutionType) ? req.query.institutionType as any[] : [req.query.institutionType as any]) : undefined,
+        languages: req.query.languages ? (Array.isArray(req.query.languages) ? req.query.languages as string[] : [req.query.languages as string]) : undefined,
+        isVerified: req.query.isVerified === 'true',
+        isFeatured: req.query.isFeatured === 'true',
+        query: req.query.search as string,
+        sortBy: req.query.sortBy as string || 'rating',
+        limit: parseInt(req.query.limit as string) || 20,
+        offset: parseInt(req.query.offset as string) || 0,
+      };
+
+      const result = await storage.getTutors(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching tutors:", error);
+      res.status(500).json({ message: "Failed to fetch tutors" });
+    }
+  });
+
+  app.get('/api/tutors/categories', async (req, res) => {
+    try {
+      const categories = await storage.getTutorCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching tutor categories:", error);
+      res.status(500).json({ message: "Failed to fetch tutor categories" });
+    }
+  });
+
+  app.get('/api/tutors/featured', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const tutors = await storage.getFeaturedTutors(limit);
+      res.json(tutors);
+    } catch (error) {
+      console.error("Error fetching featured tutors:", error);
+      res.status(500).json({ message: "Failed to fetch featured tutors" });
+    }
+  });
+
+  app.get('/api/tutors/top-rated', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const tutors = await storage.getTopRatedTutors(limit);
+      res.json(tutors);
+    } catch (error) {
+      console.error("Error fetching top rated tutors:", error);
+      res.status(500).json({ message: "Failed to fetch top rated tutors" });
+    }
+  });
+
+  app.get('/api/tutors/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const tutor = await storage.getTutorById(id);
+      
+      if (!tutor) {
+        return res.status(404).json({ message: "Tutor not found" });
+      }
+      
+      res.json(tutor);
+    } catch (error) {
+      console.error("Error fetching tutor:", error);
+      res.status(500).json({ message: "Failed to fetch tutor" });
+    }
+  });
+
+  app.post('/api/tutors', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const tutorData = insertTutorSchema.parse({ ...req.body, userId });
+      
+      const tutor = await storage.createTutor(tutorData);
+      res.status(201).json(tutor);
+    } catch (error) {
+      console.error("Error creating tutor:", error);
+      res.status(500).json({ message: "Failed to create tutor" });
+    }
+  });
+
+  app.put('/api/tutors/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const tutorData = insertTutorSchema.partial().parse(req.body);
+      
+      const success = await storage.updateTutor(id, tutorData, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Tutor not found or unauthorized" });
+      }
+      
+      res.json({ message: "Tutor updated successfully" });
+    } catch (error) {
+      console.error("Error updating tutor:", error);
+      res.status(500).json({ message: "Failed to update tutor" });
+    }
+  });
+
+  app.delete('/api/tutors/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const success = await storage.deleteTutor(id, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Tutor not found or unauthorized" });
+      }
+      
+      res.json({ message: "Tutor deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting tutor:", error);
+      res.status(500).json({ message: "Failed to delete tutor" });
+    }
+  });
+
+  // Tutor ratings routes
+  app.get('/api/tutors/:id/ratings', async (req, res) => {
+    try {
+      const tutorId = parseInt(req.params.id);
+      const ratings = await storage.getTutorRatings(tutorId);
+      res.json(ratings);
+    } catch (error) {
+      console.error("Error fetching tutor ratings:", error);
+      res.status(500).json({ message: "Failed to fetch tutor ratings" });
+    }
+  });
+
+  app.post('/api/tutors/:id/ratings', isAuthenticated, async (req: any, res) => {
+    try {
+      const tutorId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const ratingData = insertTutorRatingSchema.parse({ ...req.body, tutorId, userId });
+      
+      // Check if user already rated this tutor
+      const existingRating = await storage.getUserTutorRating(tutorId, userId);
+      
+      if (existingRating) {
+        await storage.updateTutorRating(existingRating.id, ratingData.rating, ratingData.review || undefined);
+        res.json({ message: "Rating updated successfully" });
+      } else {
+        const rating = await storage.addTutorRating(ratingData);
+        res.status(201).json(rating);
+      }
+    } catch (error) {
+      console.error("Error adding tutor rating:", error);
+      res.status(500).json({ message: "Failed to add tutor rating" });
+    }
+  });
+
+  // Tutor availability slots routes
+  app.get('/api/tutors/:id/availability', async (req, res) => {
+    try {
+      const tutorId = parseInt(req.params.id);
+      const slots = await storage.getTutorAvailabilitySlots(tutorId);
+      res.json(slots);
+    } catch (error) {
+      console.error("Error fetching tutor availability:", error);
+      res.status(500).json({ message: "Failed to fetch tutor availability" });
+    }
+  });
+
+  app.post('/api/tutors/:id/availability', isAuthenticated, async (req: any, res) => {
+    try {
+      const tutorId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Check if user owns this tutor profile
+      const tutorProfiles = await storage.getTutorsByUserId(userId);
+      const ownsTutor = tutorProfiles.some(t => t.id === tutorId);
+      
+      if (!ownsTutor) {
+        return res.status(403).json({ message: "Unauthorized to modify this tutor's availability" });
+      }
+      
+      const slotData = insertTutorAvailabilitySlotSchema.parse({ ...req.body, tutorId });
+      const slot = await storage.addTutorAvailabilitySlot(slotData);
+      res.status(201).json(slot);
+    } catch (error) {
+      console.error("Error creating availability slot:", error);
+      res.status(500).json({ message: "Failed to create availability slot" });
+    }
+  });
+
+  app.put('/api/tutors/availability/:slotId', isAuthenticated, async (req: any, res) => {
+    try {
+      const slotId = parseInt(req.params.slotId);
+      const userId = req.user.claims.sub;
+      const slotData = insertTutorAvailabilitySlotSchema.partial().parse(req.body);
+      
+      const success = await storage.updateTutorAvailabilitySlot(slotId, slotData, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Availability slot not found or unauthorized" });
+      }
+      
+      res.json({ message: "Availability slot updated successfully" });
+    } catch (error) {
+      console.error("Error updating availability slot:", error);
+      res.status(500).json({ message: "Failed to update availability slot" });
+    }
+  });
+
+  app.delete('/api/tutors/availability/:slotId', isAuthenticated, async (req: any, res) => {
+    try {
+      const slotId = parseInt(req.params.slotId);
+      const userId = req.user.claims.sub;
+      
+      // We need the tutor ID for authorization - get it from the slot
+      // This is a simplified approach; in production, you might want to verify ownership differently
+      const success = await storage.deleteTutorAvailabilitySlot(slotId, 0, userId); // tutorId=0 as placeholder since method will verify ownership
+      
+      if (!success) {
+        return res.status(404).json({ message: "Availability slot not found or unauthorized" });
+      }
+      
+      res.json({ message: "Availability slot deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting availability slot:", error);
+      res.status(500).json({ message: "Failed to delete availability slot" });
+    }
+  });
+
+  // Tutor sessions routes
+  app.get('/api/tutor-sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const filters = {
+        tutorId: req.query.tutorId ? parseInt(req.query.tutorId as string) : undefined,
+        studentId: req.query.studentId as string || userId, // Default to current user
+        status: req.query.status as string,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+      };
+      
+      const sessions = await storage.getTutorSessions(filters);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching tutor sessions:", error);
+      res.status(500).json({ message: "Failed to fetch tutor sessions" });
+    }
+  });
+
+  app.get('/api/tutor-sessions/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const session = await storage.getTutorSessionById(id);
+      
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      
+      // Check if user is either the student or the tutor
+      let isAuthorized = false;
+      
+      // Check if user is the student who booked the session
+      if (session.studentId === userId) {
+        isAuthorized = true;
+      } else {
+        // Check if user owns the tutor profile
+        const tutorProfiles = await storage.getTutorsByUserId(userId);
+        const ownsTutor = tutorProfiles.some(t => t.id === session.tutorId);
+        if (ownsTutor) {
+          isAuthorized = true;
+        }
+      }
+      
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Unauthorized to view this session" });
+      }
+      
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching tutor session:", error);
+      res.status(500).json({ message: "Failed to fetch tutor session" });
+    }
+  });
+
+  app.post('/api/tutor-sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const sessionData = insertTutorSessionSchema.parse({ ...req.body, studentId: userId });
+      
+      const session = await storage.createTutorSession(sessionData);
+      res.status(201).json(session);
+    } catch (error) {
+      console.error("Error creating tutor session:", error);
+      res.status(500).json({ message: "Failed to create tutor session" });
+    }
+  });
+
+  app.put('/api/tutor-sessions/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const sessionData = insertTutorSessionSchema.partial().parse(req.body);
+      
+      // First get the session to verify authorization
+      const session = await storage.getTutorSessionById(id);
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      
+      // Check if user is either the student or the tutor
+      let isAuthorized = false;
+      
+      // Check if user is the student who booked the session
+      if (session.studentId === userId) {
+        isAuthorized = true;
+      } else {
+        // Check if user owns the tutor profile
+        const tutorProfiles = await storage.getTutorsByUserId(userId);
+        const ownsTutor = tutorProfiles.some(t => t.id === session.tutorId);
+        if (ownsTutor) {
+          isAuthorized = true;
+        }
+      }
+      
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Unauthorized to modify this session" });
+      }
+      
+      const success = await storage.updateTutorSession(id, sessionData);
+      
+      if (!success) {
+        return res.status(500).json({ message: "Failed to update session" });
+      }
+      
+      res.json({ message: "Session updated successfully" });
+    } catch (error) {
+      console.error("Error updating tutor session:", error);
+      res.status(500).json({ message: "Failed to update tutor session" });
+    }
+  });
+
+  app.post('/api/tutor-sessions/:id/cancel', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const success = await storage.cancelTutorSession(id, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Session not found or unauthorized" });
+      }
+      
+      res.json({ message: "Session cancelled successfully" });
+    } catch (error) {
+      console.error("Error cancelling tutor session:", error);
+      res.status(500).json({ message: "Failed to cancel tutor session" });
+    }
+  });
+
+  // Saved tutors routes
+  app.get('/api/saved-tutors', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const savedTutors = await storage.getUserSavedTutors(userId);
+      res.json(savedTutors);
+    } catch (error) {
+      console.error("Error fetching saved tutors:", error);
+      res.status(500).json({ message: "Failed to fetch saved tutors" });
+    }
+  });
+
+  app.post('/api/tutors/:id/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const tutorId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const savedTutor = await storage.saveTutor({ tutorId, userId });
+      res.status(201).json(savedTutor);
+    } catch (error) {
+      console.error("Error saving tutor:", error);
+      res.status(500).json({ message: "Failed to save tutor" });
+    }
+  });
+
+  app.delete('/api/tutors/:id/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const tutorId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.unsaveTutor(tutorId, userId);
+      res.json({ message: "Tutor unsaved successfully" });
+    } catch (error) {
+      console.error("Error unsaving tutor:", error);
+      res.status(500).json({ message: "Failed to unsave tutor" });
+    }
+  });
+
+  app.get('/api/tutors/:id/saved', isAuthenticated, async (req: any, res) => {
+    try {
+      const tutorId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const isSaved = await storage.isTutorSaved(tutorId, userId);
+      res.json({ saved: isSaved });
+    } catch (error) {
+      console.error("Error checking if tutor is saved:", error);
+      res.status(500).json({ message: "Failed to check saved status" });
     }
   });
 
