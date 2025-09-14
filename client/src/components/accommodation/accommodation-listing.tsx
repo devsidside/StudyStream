@@ -10,6 +10,21 @@ import { Input } from "@/components/ui/input";
 import { MapPin, Star, Phone, Heart, Camera, Calendar, MessageCircle, Map, Filter, Grid, List } from "lucide-react";
 import RatingStars from "@/components/common/rating-stars";
 import { cn } from "@/lib/utils";
+import type { 
+  AccommodationSearchFilters, 
+  AccommodationSearchResult, 
+  AccommodationWithRooms,
+  Amenity,
+  RoomType,
+  AccommodationType 
+} from "@shared/schema";
+
+// Filter item type for UI filters
+interface FilterItem {
+  key: string;
+  label: string;
+  checked: boolean;
+}
 
 // Distance filter options
 const DISTANCE_FILTERS = [
@@ -71,28 +86,28 @@ const SORT_OPTIONS = [
 ];
 
 // Build API query parameters from filters
-const buildQueryParams = (filters: any) => {
+const buildQueryParams = (filters: AccommodationSearchFilters) => {
   const params = new URLSearchParams();
   
   // Basic filters
   if (filters.college) params.append('college', filters.college);
-  if (filters.distance) params.append('distance', filters.distance);
+  if (filters.distance) params.append('distance', String(filters.distance));
   if (filters.accommodationType) params.append('accommodationType', filters.accommodationType);
   if (filters.genderPreference) params.append('genderPreference', filters.genderPreference);
   if (filters.roomType) params.append('roomType', filters.roomType);
-  if (filters.rating) params.append('rating', filters.rating);
+  if (filters.rating) params.append('rating', String(filters.rating));
   
   // Search term - backend expects 'search' not 'searchTerm'
   if (filters.query) params.append('search', filters.query);
   
   // Amenities array - backend expects 'amenities' not 'quickFilters'
   if (filters.amenities && Array.isArray(filters.amenities)) {
-    filters.amenities.forEach((amenity: string) => params.append('amenities', amenity));
+    filters.amenities.forEach((amenity: Amenity) => params.append('amenities', amenity));
   }
   
   // Price range
-  if (filters.minPrice) params.append('minPrice', filters.minPrice);
-  if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+  if (filters.minPrice) params.append('minPrice', String(filters.minPrice));
+  if (filters.maxPrice) params.append('maxPrice', String(filters.maxPrice));
   
   // Sorting
   if (filters.sortBy) params.append('sortBy', filters.sortBy);
@@ -105,8 +120,8 @@ const buildQueryParams = (filters: any) => {
 };
 
 interface AccommodationListingProps {
-  searchFilters?: any;
-  onFiltersChange?: (filters: any) => void;
+  searchFilters?: AccommodationSearchFilters;
+  onFiltersChange?: (filters: AccommodationSearchFilters) => void;
   className?: string;
 }
 
@@ -115,21 +130,18 @@ export default function AccommodationListing({
   onFiltersChange,
   className 
 }: AccommodationListingProps) {
-  const [distanceFilters, setDistanceFilters] = useState(DISTANCE_FILTERS);
-  const [rentFilters, setRentFilters] = useState(RENT_FILTERS);
-  const [roomTypeFilters, setRoomTypeFilters] = useState(ROOM_TYPE_FILTERS);
-  const [amenitiesFilters, setAmenitiesFilters] = useState(AMENITIES_FILTERS);
-  const [ratingFilters, setRatingFilters] = useState(RATING_FILTERS);
-  const [specialFilters, setSpecialFilters] = useState(SPECIAL_FILTERS);
+  const [distanceFilters, setDistanceFilters] = useState<FilterItem[]>(DISTANCE_FILTERS);
+  const [rentFilters, setRentFilters] = useState<FilterItem[]>(RENT_FILTERS);
+  const [roomTypeFilters, setRoomTypeFilters] = useState<FilterItem[]>(ROOM_TYPE_FILTERS);
+  const [amenitiesFilters, setAmenitiesFilters] = useState<FilterItem[]>(AMENITIES_FILTERS);
+  const [ratingFilters, setRatingFilters] = useState<FilterItem[]>(RATING_FILTERS);
+  const [specialFilters, setSpecialFilters] = useState<FilterItem[]>(SPECIAL_FILTERS);
   const [sortBy, setSortBy] = useState('price-asc');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [selectedForComparison, setSelectedForComparison] = useState<number[]>([]);
 
   // Fetch accommodations with React Query
-  const { data: accommodationsData, isLoading, error } = useQuery<{
-    accommodations: any[];
-    total: number;
-  }>({
+  const { data: accommodationsData, isLoading, error } = useQuery<AccommodationSearchResult>({
     queryKey: ['/api/accommodations', searchFilters],
     queryFn: async () => {
       if (!searchFilters) return { accommodations: [], total: 0 };
@@ -150,7 +162,7 @@ export default function AccommodationListing({
   const totalAccommodations = accommodationsData?.total || 0;
 
   // Toggle filter function
-  const toggleFilter = (filters: any[], setFilters: any, key: string) => {
+  const toggleFilter = (filters: FilterItem[], setFilters: React.Dispatch<React.SetStateAction<FilterItem[]>>, key: string) => {
     setFilters(filters.map(filter => 
       filter.key === key ? { ...filter, checked: !filter.checked } : filter
     ));
@@ -389,7 +401,7 @@ export default function AccommodationListing({
         {/* Accommodation Cards */}
         {!isLoading && !error && accommodations.length > 0 && (
           <div className="space-y-4" data-testid="accommodation-cards">
-            {accommodations.map((accommodation: any) => (
+            {accommodations.map((accommodation: AccommodationWithRooms) => (
             <Card key={accommodation.id} className="hover:shadow-md transition-shadow" data-testid={`card-accommodation-${accommodation.id}`}>
               <CardContent className="p-6">
                 <div className="space-y-4">

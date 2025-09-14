@@ -1,31 +1,16 @@
 import { useState } from "react";
 import AccommodationSearch from "@/components/accommodation/accommodation-search";
 import AccommodationListing from "@/components/accommodation/accommodation-listing";
-
-interface AccommodationFilters {
-  college?: string;
-  distance?: string;
-  accommodationType?: string;
-  occupancy?: string;
-  query?: string;
-  quickFilters?: string[];
-  distanceFilters?: string[];
-  rentFilters?: string[];
-  roomTypeFilters?: string[];
-  amenitiesFilters?: string[];
-  ratingFilters?: string[];
-  specialFilters?: string[];
-  sortBy?: string;
-}
+import type { AccommodationSearchFilters } from "@shared/schema";
 
 export default function AccommodationsPage() {
-  const [filters, setFilters] = useState<AccommodationFilters>({});
+  const [filters, setFilters] = useState<AccommodationSearchFilters>({});
 
-  const handleSearch = (searchData: any) => {
+  const handleSearch = (searchData: AccommodationSearchFilters) => {
     setFilters(searchData);
   };
 
-  const handleFiltersChange = (newFilters: any) => {
+  const handleFiltersChange = (newFilters: AccommodationSearchFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
 

@@ -9,6 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Users, Building, Home, Filter, Star, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { 
+  AccommodationSearchFilters, 
+  AccommodationType, 
+  GenderPreference,
+  Amenity
+} from "@shared/schema";
 
 // Smart location search with colleges/universities
 const POPULAR_COLLEGES = [
@@ -28,13 +34,14 @@ const DISTANCE_OPTIONS = [
   { key: '5000', label: 'Within 5km', icon: '🚗' },
 ];
 
-// Accommodation types with counts
+// Accommodation types with counts (aligned with schema enum)
 const ACCOMMODATION_TYPES = [
-  { key: 'pg', label: 'PG/HOSTELS', description: 'Most Popular', icon: '🏠', count: 2347 },
+  { key: 'pg', label: 'PG', description: 'Paying Guest', icon: '🏠', count: 1847 },
+  { key: 'hostel', label: 'HOSTELS', description: 'Student Hostels', icon: '🏫', count: 500 },
   { key: 'apartment', label: 'APARTMENTS', description: 'Premium Living', icon: '🏨', count: 567 },
   { key: 'shared-room', label: 'SHARED', description: 'Budget Friendly', icon: '🏠', count: 1234 },
   { key: 'flat', label: 'FLATS', description: 'Independent', icon: '🏘️', count: 345 },
-];
+] as const;
 
 // Quick filters for accommodation
 const QUICK_FILTERS = [
@@ -56,8 +63,8 @@ const OCCUPANCY_OPTIONS = [
 ];
 
 interface AccommodationSearchProps {
-  onFiltersChange?: (filters: any) => void;
-  onSearch?: (searchData: any) => void;
+  onFiltersChange?: (filters: AccommodationSearchFilters) => void;
+  onSearch?: (searchData: AccommodationSearchFilters) => void;
   className?: string;
 }
 
@@ -90,16 +97,51 @@ export default function AccommodationSearch({
 
   // Handle search execution
   const handleSearch = () => {
-    const searchData = {
-      college: selectedCollege,
-      distance: selectedDistance,
-      accommodationType: selectedAccommodationType,
-      occupancy: selectedOccupancy,
-      query: searchQuery,
-      quickFilters: selectedQuickFilters,
+    // Extract amenities from quick filters
+    const amenities = selectedQuickFilters
+      .filter(filter => QUICK_FILTERS.find(f => f.key === filter)?.type === 'amenity')
+      .filter((amenity): amenity is Amenity => {
+        // Ensure the amenity is valid according to the schema
+        const validAmenities: Amenity[] = ['ac', 'wifi', 'mess', 'laundry', 'security', 'cctv', 'gym', 'pool', 'parking', 'study-room', 'common-area', 'hot-water', 'attached-bath', 'meals'];
+        return validAmenities.includes(amenity as Amenity);
+      });
+
+    // Extract gender preference from quick filters
+    const genderFilter = selectedQuickFilters
+      .find(filter => QUICK_FILTERS.find(f => f.key === filter)?.type === 'gender');
+    const genderPreference = genderFilter && ['boys', 'girls', 'co-ed'].includes(genderFilter) 
+      ? genderFilter as GenderPreference 
+      : undefined;
+
+    // Extract price filters
+    const priceFilter = selectedQuickFilters
+      .find(filter => QUICK_FILTERS.find(f => f.key === filter)?.type === 'price');
+    const maxPrice = priceFilter === 'under-10k' ? 10000 : undefined;
+
+    const searchData: AccommodationSearchFilters = {
+      college: selectedCollege || undefined,
+      distance: selectedDistance ? parseInt(selectedDistance, 10) : undefined,
+      accommodationType: selectedAccommodationType as AccommodationType || undefined,
+      genderPreference,
+      amenities: amenities.length > 0 ? amenities : undefined,
+      maxPrice,
+      query: searchQuery || undefined,
+      // Additional filters that can be extended
+      // roomType: undefined, // Could be mapped from occupancy if needed
+      // minPrice: undefined,
+      // rating: undefined,
+      // sortBy: undefined,
+      // limit: undefined,
+      // offset: undefined,
     };
     
-    onSearch?.(searchData);
+    // Filter out undefined values to keep the object clean
+    const cleanedSearchData = Object.fromEntries(
+      Object.entries(searchData).filter(([_, value]) => value !== undefined)
+    ) as AccommodationSearchFilters;
+    
+    onSearch?.(cleanedSearchData);
+    onFiltersChange?.(cleanedSearchData);
   };
 
   // Get popular searches for suggestions

@@ -559,3 +559,37 @@ export type InsertAccommodationVisit = z.infer<typeof insertAccommodationVisitSc
 export type AccommodationVisit = typeof accommodationVisits.$inferSelect;
 export type InsertAccommodationBooking = z.infer<typeof insertAccommodationBookingSchema>;
 export type AccommodationBooking = typeof accommodationBookings.$inferSelect;
+
+// Additional types for frontend use
+export type AccommodationWithRooms = Accommodation & {
+  rooms: AccommodationRoom[];
+  vendor?: Vendor;
+  isSaved?: boolean;
+};
+
+export type AccommodationSearchFilters = {
+  college?: string;
+  distance?: number;
+  accommodationType?: typeof accommodationTypeEnum.enumValues[number];
+  genderPreference?: typeof genderPreferenceEnum.enumValues[number];
+  roomType?: typeof roomTypeEnum.enumValues[number];
+  amenities?: (typeof amenityEnum.enumValues[number])[];
+  minPrice?: number;
+  maxPrice?: number;
+  rating?: number;
+  query?: string;
+  sortBy?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export type AccommodationSearchResult = {
+  accommodations: AccommodationWithRooms[];
+  total: number;
+};
+
+// Enum value types for easy use in components
+export type AccommodationType = typeof accommodationTypeEnum.enumValues[number];
+export type RoomType = typeof roomTypeEnum.enumValues[number];
+export type GenderPreference = typeof genderPreferenceEnum.enumValues[number];
+export type Amenity = typeof amenityEnum.enumValues[number];
