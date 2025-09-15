@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ChevronDown, Menu, Search, BookOpen, Home, Users, GraduationCap, Smartphone, Trophy, FileText, BarChart3, DollarSign, TrendingUp, Target, Handshake, MessageCircle } from "lucide-react";
+import { ChevronDown, Menu, Search, BookOpen, Home, Users, GraduationCap, Smartphone, Trophy, FileText, BarChart3, DollarSign, TrendingUp, Target, Handshake, MessageCircle, Coffee, Bus, FolderOpen, Settings, Code2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -92,10 +92,40 @@ export default function Navbar() {
                       <Link href="/study-groups" onClick={() => setIsMobileMenuOpen(false)}>
                         <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-events-mobile">
                           <Users className="mr-2 h-4 w-4" />
-                          Events & Study Groups
+                          🎉 Events & Study Groups
                         </Button>
                       </Link>
                     )}
+                    <Link href="/campus-cafes" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-campus-cafes-mobile">
+                        <Coffee className="mr-2 h-4 w-4" />
+                        ☕ Campus Cafes & Study Spaces
+                      </Button>
+                    </Link>
+                    <Link href="/transport" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-transport-mobile">
+                        <Bus className="mr-2 h-4 w-4" />
+                        🚌 Transport & Travel
+                      </Button>
+                    </Link>
+                    <Link href="/projects" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-projects-mobile">
+                        <FolderOpen className="mr-2 h-4 w-4" />
+                        Projects
+                      </Button>
+                    </Link>
+                    <Link href="/practicals" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-practicals-mobile">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Practicals
+                      </Button>
+                    </Link>
+                    <Link href="/code" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-code-mobile">
+                        <Code2 className="mr-2 h-4 w-4" />
+                        Code
+                      </Button>
+                    </Link>
                   </div>
                   
                   {/* Mobile For Vendors section */}
@@ -207,10 +237,40 @@ export default function Navbar() {
                     <DropdownMenuItem asChild>
                       <Link href="/study-groups" className="flex w-full" data-testid="link-events">
                         <Users className="mr-2 h-4 w-4" />
-                        Events & Study Groups
+                        🎉 Events & Study Groups
                       </Link>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem asChild>
+                    <Link href="/campus-cafes" className="flex w-full" data-testid="link-campus-cafes">
+                      <Coffee className="mr-2 h-4 w-4" />
+                      ☕ Campus Cafes & Study Spaces
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/transport" className="flex w-full" data-testid="link-transport">
+                      <Bus className="mr-2 h-4 w-4" />
+                      🚌 Transport & Travel
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/projects" className="flex w-full" data-testid="link-projects">
+                      <FolderOpen className="mr-2 h-4 w-4" />
+                      Projects
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/practicals" className="flex w-full" data-testid="link-practicals">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Practicals
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/code" className="flex w-full" data-testid="link-code">
+                      <Code2 className="mr-2 h-4 w-4" />
+                      Code
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
