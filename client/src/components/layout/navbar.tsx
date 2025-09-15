@@ -50,7 +50,7 @@ export default function Navbar() {
                   </div>
                   
                   <Link href="/how-it-works">
-                    <Button variant="ghost" className="w-full justify-start" data-testid="link-how-it-works-mobile">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-how-it-works-mobile">
                       How It Works
                     </Button>
                   </Link>
@@ -59,43 +59,43 @@ export default function Navbar() {
                   <div className="space-y-2">
                     <div className="font-medium text-foreground px-4 py-2">For Students</div>
                     <Link href="/browse">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-browse-services-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-browse-services-mobile">
                         <Search className="mr-2 h-4 w-4" />
                         Browse All Services
                       </Button>
                     </Link>
                     <Link href="/notes">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-study-notes-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-study-notes-mobile">
                         <BookOpen className="mr-2 h-4 w-4" />
                         Study Notes & Resources
                       </Button>
                     </Link>
                     <Link href="/accommodation">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-accommodation-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-accommodation-mobile">
                         <Home className="mr-2 h-4 w-4" />
                         Find Accommodation
                       </Button>
                     </Link>
                     <Link href="/tutors">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-tutors-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-tutors-mobile">
                         <GraduationCap className="mr-2 h-4 w-4" />
                         Book Tutors & Coaching
                       </Button>
                     </Link>
                     <Link href="/events">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-events-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-events-mobile">
                         <Users className="mr-2 h-4 w-4" />
                         Events & Study Groups
                       </Button>
                     </Link>
                     <Link href="/mobile-app">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-mobile-app-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-mobile-app-mobile">
                         <Smartphone className="mr-2 h-4 w-4" />
                         Mobile App
                       </Button>
                     </Link>
                     <Link href="/student-success">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-student-success-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-student-success-mobile">
                         <Trophy className="mr-2 h-4 w-4" />
                         Student Success Stories
                       </Button>
@@ -106,43 +106,43 @@ export default function Navbar() {
                   <div className="space-y-2">
                     <div className="font-medium text-foreground px-4 py-2">For Vendors</div>
                     <Link href="/vendor/list-service">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-list-service-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-list-service-mobile">
                         <FileText className="mr-2 h-4 w-4" />
                         List Your Service
                       </Button>
                     </Link>
                     <Link href="/vendor/dashboard">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-vendor-dashboard-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-vendor-dashboard-mobile">
                         <BarChart3 className="mr-2 h-4 w-4" />
                         Vendor Dashboard
                       </Button>
                     </Link>
                     <Link href="/vendor/pricing">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-vendor-pricing-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-vendor-pricing-mobile">
                         <DollarSign className="mr-2 h-4 w-4" />
                         Pricing & Plans
                       </Button>
                     </Link>
                     <Link href="/vendor/marketing">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-marketing-tools-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-marketing-tools-mobile">
                         <TrendingUp className="mr-2 h-4 w-4" />
                         Marketing Tools
                       </Button>
                     </Link>
                     <Link href="/vendor/success">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-vendor-success-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-vendor-success-mobile">
                         <Target className="mr-2 h-4 w-4" />
                         Success Stories
                       </Button>
                     </Link>
                     <Link href="/vendor/partner">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-partner-program-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-partner-program-mobile">
                         <Handshake className="mr-2 h-4 w-4" />
                         Partner Program
                       </Button>
                     </Link>
                     <Link href="/vendor/support">
-                      <Button variant="ghost" className="w-full justify-start pl-8" data-testid="link-vendor-support-mobile">
+                      <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-vendor-support-mobile">
                         <MessageCircle className="mr-2 h-4 w-4" />
                         Support Center
                       </Button>
@@ -150,7 +150,7 @@ export default function Navbar() {
                   </div>
                   
                   <Link href="/pricing">
-                    <Button variant="ghost" className="w-full justify-start" data-testid="link-pricing-mobile">
+                    <Button variant="ghost" className="w-full justify-start hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-pricing-mobile">
                       Pricing
                     </Button>
                   </Link>
@@ -158,12 +158,12 @@ export default function Navbar() {
                   {/* Mobile auth buttons */}
                   <div className="pt-4 border-t border-border space-y-2">
                     <Link href="/signin">
-                      <Button variant="ghost" className="w-full" data-testid="button-login-mobile">
+                      <Button variant="ghost" className="w-full hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="button-login-mobile">
                         Login
                       </Button>
                     </Link>
                     <Link href="/signin">
-                      <Button className="w-full" data-testid="button-signup-free-mobile">
+                      <Button className="w-full hover:shadow-lg transition-all duration-200 ease-in-out" data-testid="button-signup-free-mobile">
                         Sign Up Free
                       </Button>
                     </Link>
@@ -174,7 +174,7 @@ export default function Navbar() {
             
             <div className="hidden md:flex space-x-6">
               <Link href="/how-it-works">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-how-it-works">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="link-how-it-works">
                   How It Works
                 </Button>
               </Link>
@@ -182,8 +182,8 @@ export default function Navbar() {
               {/* For Students Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-for-students">
-                    For Students <ChevronDown className="ml-1 h-4 w-4" />
+                  <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="dropdown-for-students">
+                    For Students <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
@@ -221,8 +221,8 @@ export default function Navbar() {
               {/* For Vendors Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="dropdown-for-vendors">
-                    For Vendors <ChevronDown className="ml-1 h-4 w-4" />
+                  <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="dropdown-for-vendors">
+                    For Vendors <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56">
@@ -258,7 +258,7 @@ export default function Navbar() {
               </DropdownMenu>
 
               <Link href="/pricing">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors" data-testid="link-pricing">
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="link-pricing">
                   Pricing
                 </Button>
               </Link>
@@ -267,12 +267,12 @@ export default function Navbar() {
           
           <div className="hidden md:flex items-center space-x-4">
             <Link href="/signin">
-              <Button variant="ghost" data-testid="button-login">
+              <Button variant="ghost" className="hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="button-login">
                 Login
               </Button>
             </Link>
             <Link href="/signin">
-              <Button data-testid="button-signup-free">
+              <Button className="hover:shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="button-signup-free">
                 Sign Up Free
               </Button>
             </Link>
