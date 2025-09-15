@@ -99,13 +99,13 @@ export default function Navbar() {
                     <Link href="/campus-cafes" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-campus-cafes-mobile">
                         <Coffee className="mr-2 h-4 w-4" />
-                        ☕ Campus Cafes & Study Spaces
+                        Campus Cafes & Study Spaces
                       </Button>
                     </Link>
                     <Link href="/transport" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="ghost" className="w-full justify-start pl-8 hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="link-transport-mobile">
                         <Bus className="mr-2 h-4 w-4" />
-                        🚌 Transport & Travel
+                        Transport & Travel
                       </Button>
                     </Link>
                     <Link href="/projects" onClick={() => setIsMobileMenuOpen(false)}>

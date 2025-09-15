@@ -13,6 +13,7 @@ import {
   serial,
   time,
   unique,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -140,7 +141,7 @@ export const noteComments = pgTable("note_comments", {
   noteId: integer("note_id").references(() => notes.id, { onDelete: "cascade" }).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
-  parentId: integer("parent_id").references(() => noteComments.id),
+  parentId: integer("parent_id").references((): AnyPgColumn => noteComments.id),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("idx_note_comments_note").on(table.noteId),
