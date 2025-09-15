@@ -71,12 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Fetch profile if user exists
       if (session?.user?.id) {
-        const profileData = await fetchProfile(session.user.id)
-        setProfile(profileData)
+        try {
+          const profileData = await fetchProfile(session.user.id)
+          setProfile(profileData)
+        } catch (error) {
+          console.error('Error fetching profile:', error)
+          setProfile(null)
+        }
       } else {
         setProfile(null)
       }
       
+      setLoading(false)
+    }).catch((error) => {
+      console.error('Error getting session:', error)
       setLoading(false)
     })
 
@@ -88,8 +96,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Fetch profile when user changes
         if (session?.user?.id) {
-          const profileData = await fetchProfile(session.user.id)
-          setProfile(profileData)
+          try {
+            const profileData = await fetchProfile(session.user.id)
+            setProfile(profileData)
+          } catch (error) {
+            console.error('Error fetching profile:', error)
+            setProfile(null)
+          }
         } else {
           setProfile(null)
         }
