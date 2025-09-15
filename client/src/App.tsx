@@ -30,6 +30,7 @@ import SignIn from "@/pages/signin";
 import HowItWorks from "@/pages/how-it-works";
 import BrowseServices from "@/pages/browse-services";
 import Accommodations from "@/pages/accommodations";
+import BookTutors from "@/pages/book-tutors";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -43,6 +44,9 @@ function Router() {
           <Route path="/browse-services" component={BrowseServices} />
           <Route path="/accommodations" component={Accommodations} />
           <Route path="/vendors" component={Vendors} />
+          <Route path="/vendors/pricing" component={PricingPlans} />
+          <Route path="/vendors/success-stories" component={SuccessStories} />
+          <Route path="/book-tutors" component={BookTutors} />
           <Route path="/signin" component={SignIn} />
           <Route path="/auth-demo" component={AuthDemo} />
           <Route path="/auth/callback" component={AuthCallback} />
@@ -65,6 +69,7 @@ function Router() {
           <Route path="/vendors/dashboard" component={VendorDashboard} />
           <Route path="/vendors/pricing" component={PricingPlans} />
           <Route path="/vendors/success-stories" component={SuccessStories} />
+          <Route path="/book-tutors" component={BookTutors} />
           <Route path="/dashboard" component={StudentDashboard} />
           <Route path="/discovery" component={Discovery} />
           <Route path="/map" component={MapView} />
