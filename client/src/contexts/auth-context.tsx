@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Function to fetch user profile
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('users')
       .select('*')
       .eq('id', userId)
       .single()
@@ -165,7 +165,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Use upsert to handle cases where profile doesn't exist yet (OAuth users)
     const { error } = await supabase
-      .from('profiles')
+      .from('users')
       .upsert({ 
         id: user.id,
         email: user.email || '',
