@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronDown, Menu, Search, BookOpen, Home, Users, GraduationCap, Smartphone, Trophy, FileText, BarChart3, DollarSign, TrendingUp, Target, Handshake, MessageCircle, Coffee, Bus, FolderOpen, Settings, Code2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
+import DualAuthModal from "@/components/auth/dual-auth-modal";
 
 export default function Navbar() {
   const [location] = useLocation();
@@ -12,6 +13,8 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [studentsDropdownOpen, setStudentsDropdownOpen] = useState(false);
   const [vendorsDropdownOpen, setVendorsDropdownOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalType, setAuthModalType] = useState<'login' | 'signup'>('login');
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -169,16 +172,29 @@ export default function Navbar() {
                   
                   {/* Mobile auth buttons */}
                   <div className="pt-4 border-t border-border space-y-2">
-                    <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full hover:bg-muted/70 transition-all duration-200 ease-in-out" data-testid="button-login-mobile">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button className="w-full hover:shadow-lg transition-all duration-200 ease-in-out" data-testid="button-signup-free-mobile">
-                        Sign Up Free
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full hover:bg-muted/70 transition-all duration-200 ease-in-out" 
+                      data-testid="button-login-mobile"
+                      onClick={() => {
+                        setAuthModalType('login');
+                        setAuthModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Login
+                    </Button>
+                    <Button 
+                      className="w-full hover:shadow-lg transition-all duration-200 ease-in-out" 
+                      data-testid="button-signup-free-mobile"
+                      onClick={() => {
+                        setAuthModalType('signup');
+                        setAuthModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Sign Up Free
+                    </Button>
                   </div>
                 </nav>
               </SheetContent>
@@ -330,19 +346,37 @@ export default function Navbar() {
           </div>
           
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/signin">
-              <Button variant="ghost" className="hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="button-login">
-                Login
-              </Button>
-            </Link>
-            <Link href="/signin">
-              <Button className="hover:shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="button-signup-free">
-                Sign Up Free
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              className="hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" 
+              data-testid="button-login"
+              onClick={() => {
+                setAuthModalType('login');
+                setAuthModalOpen(true);
+              }}
+            >
+              Login
+            </Button>
+            <Button 
+              className="hover:shadow-lg transition-all duration-200 ease-in-out transform hover:scale-105" 
+              data-testid="button-signup-free"
+              onClick={() => {
+                setAuthModalType('signup');
+                setAuthModalOpen(true);
+              }}
+            >
+              Sign Up Free
+            </Button>
           </div>
         </div>
       </div>
+      
+      {/* Dual Authentication Modal */}
+      <DualAuthModal 
+        open={authModalOpen} 
+        onOpenChange={setAuthModalOpen} 
+        type={authModalType} 
+      />
     </nav>
   );
 }
