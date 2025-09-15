@@ -8,6 +8,8 @@ import { useState } from "react";
 export default function Navbar() {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [studentsDropdownOpen, setStudentsDropdownOpen] = useState(false);
+  const [vendorsDropdownOpen, setVendorsDropdownOpen] = useState(false);
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -180,13 +182,21 @@ export default function Navbar() {
               </Link>
               
               {/* For Students Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <DropdownMenu open={studentsDropdownOpen} onOpenChange={setStudentsDropdownOpen}>
+                <DropdownMenuTrigger 
+                  asChild
+                  onMouseEnter={() => setStudentsDropdownOpen(true)}
+                  onMouseLeave={() => setStudentsDropdownOpen(false)}
+                >
                   <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="dropdown-for-students">
-                    For Students <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200 group-hover:rotate-180" />
+                    For Students <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-200 ${studentsDropdownOpen ? 'rotate-180' : ''}`} />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
+                <DropdownMenuContent 
+                  className="w-56" 
+                  onMouseEnter={() => setStudentsDropdownOpen(true)}
+                  onMouseLeave={() => setStudentsDropdownOpen(false)}
+                >
                   <DropdownMenuItem>
                     <Search className="mr-2 h-4 w-4" />
                     <Link href="/browse" className="flex-1" data-testid="link-browse-services">Browse All Services</Link>
@@ -219,13 +229,21 @@ export default function Navbar() {
               </DropdownMenu>
 
               {/* For Vendors Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <DropdownMenu open={vendorsDropdownOpen} onOpenChange={setVendorsDropdownOpen}>
+                <DropdownMenuTrigger 
+                  asChild
+                  onMouseEnter={() => setVendorsDropdownOpen(true)}
+                  onMouseLeave={() => setVendorsDropdownOpen(false)}
+                >
                   <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 ease-in-out transform hover:scale-105" data-testid="dropdown-for-vendors">
-                    For Vendors <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200" />
+                    For Vendors <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-200 ${vendorsDropdownOpen ? 'rotate-180' : ''}`} />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
+                <DropdownMenuContent 
+                  className="w-56"
+                  onMouseEnter={() => setVendorsDropdownOpen(true)}
+                  onMouseLeave={() => setVendorsDropdownOpen(false)}
+                >
                   <DropdownMenuItem>
                     <FileText className="mr-2 h-4 w-4" />
                     <Link href="/vendor/list-service" className="flex-1" data-testid="link-list-service">List Your Service</Link>
