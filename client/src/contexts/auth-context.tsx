@@ -40,20 +40,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Function to fetch user profile
-  const fetchProfile = async (userId: string): Promise<Profile | null> => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    
-    if (error) {
+  // Function to fetch user profile with retry for race condition handling
+  const fetchProfile = async (userId: string, retries: number = 3): Promise<Profile | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      
+      if (error) {
+        // If no profile found and we have retries left, wait and try again
+        // This handles the race condition where user signup completes before trigger runs
+        if (error.code === 'PGRST116' && retries > 0) {
+          console.log(`Profile not found, retrying in 500ms... (${retries} attempts left)`)
+          await new Promise(resolve => setTimeout(resolve, 500))
+          return fetchProfile(userId, retries - 1)
+        }
+        
+        console.error('Error fetching profile:', error)
+        return null
+      }
+      
+      return data
+    } catch (error) {
       console.error('Error fetching profile:', error)
       return null
     }
-    
-    return data
   }
 
   // Function to refresh profile
@@ -124,15 +137,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })
     
-    // For email signups with metadata, the database trigger will handle profile creation
-    // But let's ensure profile refresh for immediate UI updates
-    if (!error && metadata && metadata.role) {
-      // Small delay to allow database trigger to execute
-      setTimeout(async () => {
-        await refreshProfile()
-      }, 1500)
-    }
-    
     return { error }
   }
 
@@ -171,21 +175,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: { message: 'No user found' } }
     }
 
-    // Security: Prevent client from setting admin role
-    if (updates.role === 'admin') {
-      return { error: { message: 'Unauthorized: Cannot assign admin role' } }
+    // Security: Strip protected fields that users shouldn't be able to change
+    const safeUpdates = { ...updates }
+    delete (safeUpdates as any).id // Prevent primary key tampering
+    delete (safeUpdates as any).role // Prevent role escalation
+    delete (safeUpdates as any).created_at // Prevent timestamp manipulation
+    delete (safeUpdates as any).updated_at // Prevent timestamp manipulation
+
+    // Additional validation for role changes
+    if (updates.role) {
+      return { error: { message: 'Role changes are not permitted via client updates' } }
     }
 
-    // Use upsert to handle cases where profile doesn't exist yet (OAuth users)
+    // Update existing user record (trigger should have created it during signup)
     const { error } = await supabase
       .from('users')
-      .upsert({ 
-        id: user.id,
-        email: user.email || '',
-        ...updates 
-      }, {
-        onConflict: 'id'
-      })
+      .update(safeUpdates)
+      .eq('id', user.id)
 
     if (!error) {
       // Refresh profile after update
