@@ -38,8 +38,14 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   role: varchar("role").default("student"), // student, vendor, admin
+  // Student fields
   university: varchar("university"),
-  courseYear: varchar("course_year"),
+  course: varchar("course"),
+  year: varchar("year"),
+  courseYear: varchar("course_year"), // Legacy field - keeping for backward compatibility
+  // Vendor fields
+  businessType: varchar("business_type"),
+  businessName: varchar("business_name"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
