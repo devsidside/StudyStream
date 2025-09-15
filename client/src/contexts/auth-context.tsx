@@ -110,6 +110,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: metadata || {}
       }
     })
+    
+    // For email signups with metadata, the database trigger will handle profile creation
+    // But let's ensure profile refresh for immediate UI updates
+    if (!error && metadata && metadata.role) {
+      // Small delay to allow database trigger to execute
+      setTimeout(async () => {
+        await refreshProfile()
+      }, 1500)
+    }
+    
     return { error }
   }
 
@@ -148,10 +158,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: { message: 'No user found' } }
     }
 
+    // Security: Prevent client from setting admin role
+    if (updates.role === 'admin') {
+      return { error: { message: 'Unauthorized: Cannot assign admin role' } }
+    }
+
+    // Use upsert to handle cases where profile doesn't exist yet (OAuth users)
     const { error } = await supabase
       .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
+      .upsert({ 
+        id: user.id,
+        email: user.email || '',
+        ...updates 
+      }, {
+        onConflict: 'id'
+      })
 
     if (!error) {
       // Refresh profile after update
