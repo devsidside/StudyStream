@@ -10,10 +10,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
   })
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey || '', {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-})
+// Only create the client if we have valid credentials
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true
+      }
+    })
+  : null

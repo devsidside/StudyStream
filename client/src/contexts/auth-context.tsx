@@ -42,6 +42,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Function to fetch user profile with retry for race condition handling
   const fetchProfile = async (userId: string, retries: number = 3): Promise<Profile | null> => {
+    if (!supabase) {
+      console.warn('Supabase client not available - cannot fetch profile')
+      return null
+    }
+    
     try {
       const { data, error } = await supabase
         .from('users')
@@ -77,6 +82,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    if (!supabase) {
+      console.warn('Supabase client not available - skipping auth initialization')
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
@@ -128,6 +139,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signUp = async (email: string, password: string, metadata?: any) => {
+    if (!supabase) {
+      return { error: new Error('Supabase client not available') }
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -141,6 +155,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) {
+      return { error: new Error('Supabase client not available') }
+    }
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -149,10 +166,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    if (!supabase) return
     await supabase.auth.signOut()
   }
 
   const resendConfirmation = async (email: string) => {
+    if (!supabase) {
+      return { error: new Error('Supabase client not available') }
+    }
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email,
@@ -161,6 +182,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithOAuth = async (provider: 'google' | 'facebook') => {
+    if (!supabase) {
+      return { error: new Error('Supabase client not available') }
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -173,6 +197,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user?.id) {
       return { error: { message: 'No user found' } }
+    }
+
+    if (!supabase) {
+      return { error: { message: 'Supabase client not available' } }
     }
 
     // Security: Strip protected fields that users shouldn't be able to change
