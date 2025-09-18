@@ -1,0 +1,131 @@
+1️⃣ Enable Extensions
+-- PostGIS for geospatial queries
+create extension if not exists postgis;
+
+-- UUID generation if needed for custom IDs
+create extension if not exists "uuid-ossp";
+
+2️⃣ User Profiles & Roles
+-- Profiles table linked to Supabase Auth
+create table profiles (
+  id uuid references auth.users(id) on delete cascade primary key,
+  full_name text,
+  role text check (role in ('student', 'vendor', 'admin')) default 'student',
+  created_at timestamptz default now()
+);
+
+3️⃣ Vendors
+create table vendors (
+  id uuid references profiles(id) on delete cascade primary key,
+  business_name text not null,
+  category text check (category in ('hostel','mess','cafe','tuition','service')),
+  contact_info jsonb,
+  verified boolean default false,
+  created_at timestamptz default now()
+);
+
+4️⃣ Locations
+create table locations (
+  id bigserial primary key,
+  name text not null,
+  description text,
+  geom geography(Point, 4326) not null,
+  vendor_id uuid references vendors(id) on delete set null,
+  created_at timestamptz default now()
+);
+
+5️⃣ Resources (PDFs, Code, Notes)
+create table resources (
+  id bigserial primary key,
+  owner_id uuid references profiles(id) on delete cascade,
+  title text not null,
+  description text,
+  type text check (type in ('pdf','code','note','project')) not null,
+  storage_path text not null, -- path in Supabase Storage
+  is_public boolean default true,
+  created_at timestamptz default now()
+);
+
+6️⃣ Events
+create table events (
+  id bigserial primary key,
+  title text not null,
+  description text,
+  event_date timestamptz not null,
+  location_id bigint references locations(id) on delete set null,
+  created_by uuid references profiles(id) on delete set null,
+  created_at timestamptz default now()
+);
+
+7️⃣ Row-Level Security (RLS)
+
+Enable RLS on all tables:
+
+alter table profiles enable row level security;
+alter table vendors enable row level security;
+alter table locations enable row level security;
+alter table resources enable row level security;
+alter table events enable row level security;
+
+Profiles
+create policy "View own profile" on profiles
+for select using (auth.uid() = id);
+
+create policy "Update own profile" on profiles
+for update using (auth.uid() = id);
+
+Vendors
+create policy "Vendors manage their own" on vendors
+for all using (auth.uid() = id);
+
+Resources
+create policy "Public view of public resources" on resources
+for select using (is_public or auth.uid() = owner_id);
+
+create policy "Owners manage resources" on resources
+for all using (auth.uid() = owner_id);
+
+Locations
+create policy "Public can view locations" on locations
+for select using (true);
+
+create policy "Vendors manage locations" on locations
+for all using (auth.uid() = vendor_id);
+
+Events
+create policy "Public can view events" on events
+for select using (true);
+
+create policy "Creators manage events" on events
+for all using (auth.uid() = created_by);
+
+8️⃣ Storage Buckets
+
+Create bucket: resources.
+
+Policies:
+
+Only authenticated users can upload.
+
+Use signed URLs for secure downloads.
+
+🔑 Security Best Practices
+
+Use bcrypt-hashed passwords (Supabase Auth handles this).
+
+Enable TLS/SSL for all traffic (automatic with Supabase).
+
+Enable audit logs in Supabase settings for tracking changes.
+
+Regular backups (Supabase handles automatic backups on paid plans).
+
+Use roles (student, vendor, admin) for feature-based access control in your app.
+
+🏗 How It Covers All Needs
+Requirement	Covered By
+Users/Auth	auth.users + profiles with RLS
+Vendors	vendors linked to profiles
+Locations	locations with PostGIS
+PDFs/Code	resources + Supabase Storage
+Events	events linked to locations & profiles
+Security	RLS, TLS, signed URLs, role-based checks
