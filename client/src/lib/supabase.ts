@@ -1,24 +1,20 @@
 import { createClient } from '@supabase/supabase-js'
 
-const rawUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Extract the actual URL from the environment variable (handle concatenated env vars)
-const extractUrl = (rawUrl: string) => {
-  if (!rawUrl) return ''
-  
-  // Look for https:// pattern in the string
-  const urlMatch = rawUrl.match(/https:\/\/[^\s]+\.supabase\.co/)
-  return urlMatch ? urlMatch[0] : rawUrl.trim()
-}
-
-const supabaseUrl = extractUrl(rawUrl)
-
+// Debug logging
+console.log('DEBUG: Raw environment variables:', {
+  url: import.meta.env.VITE_SUPABASE_URL,
+  key: import.meta.env.VITE_SUPABASE_ANON_KEY
+})
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Missing Supabase environment variables:', {
     url: !!supabaseUrl,
-    key: !!supabaseAnonKey
+    key: !!supabaseAnonKey,
+    rawUrl: supabaseUrl,
+    rawKey: supabaseAnonKey
   })
 }
 
