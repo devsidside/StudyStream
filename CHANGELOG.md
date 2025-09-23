@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Major Features Added
 - **Complete Documentation Suite**: Added comprehensive README.md, API documentation, database schema docs, and setup guides
-- **PostGIS Integration**: Enhanced database schema with geospatial capabilities for location-based features
-- **Advanced Search System**: Implemented full-text search with faceted filtering for resources and vendors
+- **Geographic Data Support**: Basic latitude/longitude fields for location-based vendor features
+- **Advanced Search System**: Implemented search and filtering for resources and vendors with Drizzle ORM
 
 ### 🔧 Fixed
 - **Critical Supabase Integration Issues** (High Priority)
@@ -43,9 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Architecture Documentation**: System architecture and technology stack overview
 
 ### 🔒 Security Enhancements
-- **Row-Level Security (RLS)**: Implemented comprehensive database security policies
+- **Database Security**: Implemented proper access controls and user validation
 - **Input Validation**: Enhanced Zod schema validation across all endpoints
-- **Authentication Hardening**: Improved OAuth integration with proper error handling
+- **Authentication Hardening**: Improved Replit OAuth integration with proper error handling
 
 ### 🎨 UI/UX Improvements
 - **Hero Section Refactoring**: Modularized landing page components for better maintainability
@@ -131,16 +131,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Database Migrations
 
-#### v1.2.0 - PostGIS Integration
+#### v1.2.0 - Geographic Data Support
 ```sql
--- Enable PostGIS extension
-CREATE EXTENSION IF NOT EXISTS postgis;
+-- Add basic geographic fields for vendors
+ALTER TABLE vendors ADD COLUMN latitude DECIMAL(10, 8);
+ALTER TABLE vendors ADD COLUMN longitude DECIMAL(11, 8);
 
--- Add geospatial columns
-ALTER TABLE locations ADD COLUMN geom GEOGRAPHY(Point, 4326);
-
--- Create spatial indexes
-CREATE INDEX idx_locations_geom ON locations USING GIST(geom);
+-- Add indexes for location-based queries
+CREATE INDEX idx_vendors_location ON vendors(latitude, longitude);
 ```
 
 #### v1.1.0 - Enhanced Reviews

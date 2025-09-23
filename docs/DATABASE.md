@@ -11,14 +11,8 @@ StudyConnect uses PostgreSQL as its primary database with several extensions to 
 
 ### Extensions
 ```sql
--- PostGIS for geospatial functionality
-CREATE EXTENSION IF NOT EXISTS postgis;
-
--- UUID generation
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Full-text search (optional)
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- UUID generation (built-in PostgreSQL function)
+-- No additional extensions required for current functionality
 ```
 
 ---
@@ -138,33 +132,44 @@ CREATE INDEX idx_vendor_services_category ON vendor_services(category);
 
 ### Geographic Data
 
-#### locations
+#### vendors (with location data)
 ```sql
-CREATE TABLE locations (
-  id BIGSERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+CREATE TABLE vendors (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
   description TEXT,
+  category vendor_category NOT NULL,
+  owner_id VARCHAR REFERENCES users(id) NOT NULL,
+  phone VARCHAR,
+  email VARCHAR,
   address TEXT,
-  geom GEOGRAPHY(Point, 4326) NOT NULL,
-  vendor_id UUID REFERENCES vendors(id) ON DELETE SET NULL,
-  location_type TEXT CHECK (location_type IN ('campus', 'hostel', 'restaurant', 'service', 'landmark')),
-  metadata JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  latitude DECIMAL(10, 8),
+  longitude DECIMAL(11, 8),
+  website VARCHAR,
+  price_range VARCHAR,
+  average_rating DECIMAL(3,2) DEFAULT 0,
+  total_ratings INTEGER DEFAULT 0,
+  is_verified BOOLEAN DEFAULT FALSE,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Spatial indexes
-CREATE INDEX idx_locations_geom ON locations USING GIST(geom);
-CREATE INDEX idx_locations_vendor_id ON locations(vendor_id);
-CREATE INDEX idx_locations_type ON locations(location_type);
+-- Location-based indexes
+CREATE INDEX idx_vendors_location ON vendors(latitude, longitude);
+CREATE INDEX idx_vendors_category ON vendors(category);
+CREATE INDEX idx_vendors_active ON vendors(is_active);
 ```
 
-**Spatial Queries Example:**
+**Location-based Queries Example:**
 ```sql
--- Find vendors within 5km of a point
-SELECT v.*, l.address, ST_Distance(l.geom, ST_Point(-74.0060, 40.7128)::geography) as distance
+-- Find vendors near a location (basic distance calculation)
+SELECT v.*, 
+  SQRT(POW(69.1 * (latitude - ?), 2) + 
+       POW(69.1 * (? - longitude) * COS(latitude / 57.3), 2)) AS distance
 FROM vendors v
-JOIN locations l ON v.id = l.vendor_id
-WHERE ST_DWithin(l.geom, ST_Point(-74.0060, 40.7128)::geography, 5000)
+WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+HAVING distance < 10
 ORDER BY distance;
 ```
 
@@ -346,76 +351,37 @@ CREATE INDEX idx_notifications_created_at ON notifications(created_at DESC);
 
 ---
 
-## Row-Level Security (RLS)
+## Access Control
 
-### Enable RLS on all tables
-```sql
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE vendors ENABLE ROW LEVEL SECURITY;
-ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
-ALTER TABLE resource_reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE vendor_reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+### Application-Level Security
+
+The application implements security through application-level access controls rather than database-level RLS policies:
+
+#### Authentication Middleware
+```typescript
+// Routes are protected using isAuthenticated middleware
+app.get('/api/notes', isAuthenticated, async (req, res) => {
+  // Only authenticated users can access
+});
 ```
 
-### Security Policies
-
-#### Profile Access
-```sql
--- Users can view their own profile
-CREATE POLICY "View own profile" ON profiles
-  FOR SELECT USING (auth.uid() = id);
-
--- Users can update their own profile
-CREATE POLICY "Update own profile" ON profiles
-  FOR UPDATE USING (auth.uid() = id);
-
--- Public profiles visible to all authenticated users
-CREATE POLICY "View public profiles" ON profiles
-  FOR SELECT USING (auth.role() = 'authenticated');
+#### Ownership Validation
+```typescript
+// Users can only modify their own content
+const success = await storage.deleteNote(id, userId);
+// Storage layer validates ownership before deletion
 ```
 
-#### Resource Access
-```sql
--- Public resources visible to all
-CREATE POLICY "View public resources" ON resources
-  FOR SELECT USING (is_public = true OR auth.uid() = owner_id);
-
--- Resource owners can manage their resources
-CREATE POLICY "Owners manage resources" ON resources
-  FOR ALL USING (auth.uid() = owner_id);
-
--- Authenticated users can create resources
-CREATE POLICY "Create resources" ON resources
-  FOR INSERT WITH CHECK (auth.uid() = owner_id);
-```
-
-#### Vendor Access
-```sql
--- Vendors can manage their own vendor profile
-CREATE POLICY "Vendors manage their profile" ON vendors
-  FOR ALL USING (auth.uid() = id);
-
--- All authenticated users can view vendors
-CREATE POLICY "View vendors" ON vendors
-  FOR SELECT USING (auth.role() = 'authenticated');
-```
-
-#### Review Policies
-```sql
--- Users can create reviews
-CREATE POLICY "Create reviews" ON resource_reviews
-  FOR INSERT WITH CHECK (auth.uid() = reviewer_id);
-
--- Users can view all reviews
-CREATE POLICY "View reviews" ON resource_reviews
-  FOR SELECT USING (true);
-
--- Users can update their own reviews
-CREATE POLICY "Update own reviews" ON resource_reviews
-  FOR UPDATE USING (auth.uid() = reviewer_id);
+#### Role-Based Access
+```typescript
+// Different access levels based on user role
+if (user.role === 'admin') {
+  // Admin access
+} else if (user.role === 'vendor') {
+  // Vendor access
+} else {
+  // Student access
+}
 ```
 
 ---

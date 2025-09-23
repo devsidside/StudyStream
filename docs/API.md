@@ -20,76 +20,59 @@ Cookie: connect.sid=<session-id>
 
 ## Authentication Endpoints
 
-### Login User
+### Get Current User
 ```http
-POST /api/auth/login
+GET /api/auth/user
 ```
 
-**Request Body:**
-```json
-{
-  "email": "student@university.edu",
-  "password": "securePassword123"
-}
+**Headers:**
+```
+Cookie: connect.sid=<session-cookie>
 ```
 
 **Response (200 OK):**
 ```json
 {
-  "success": true,
-  "user": {
-    "id": "uuid-string",
-    "email": "student@university.edu",
-    "role": "student",
-    "profile": {
-      "firstName": "John",
-      "lastName": "Doe",
-      "university": "Example University"
-    }
-  }
+  "id": "uuid-string",
+  "email": "student@university.edu",
+  "firstName": "John",
+  "lastName": "Doe",
+  "role": "student",
+  "university": "Example University",
+  "createdAt": "2025-09-15T10:30:00Z",
+  "updatedAt": "2025-09-15T10:30:00Z"
 }
 ```
 
 **Error Response (401 Unauthorized):**
 ```json
 {
-  "error": "Invalid credentials",
-  "message": "Email or password is incorrect"
+  "message": "Authentication required"
 }
 ```
 
-### Register User
-```http
-POST /api/auth/register
-```
+### Authentication Flow
 
-**Request Body:**
-```json
-{
-  "email": "newuser@university.edu",
-  "password": "securePassword123",
-  "firstName": "Jane",
-  "lastName": "Smith",
-  "role": "student",
-  "university": "Example University",
-  "course": "Computer Science",
-  "year": "3"
-}
-```
+The application uses **Replit OAuth** for authentication. Users authenticate through Replit's OAuth service, which creates a session-based authentication system.
 
-**Response (201 Created):**
-```json
-{
-  "success": true,
-  "message": "User registered successfully",
-  "userId": "uuid-string"
-}
-```
+**Authentication Process:**
+1. User clicks "Login with Replit"
+2. Redirected to Replit OAuth authorization
+3. User grants permission
+4. Redirected back with authorization code
+5. Server exchanges code for access token
+6. User session is created with HTTP-only cookies
+7. User profile is automatically created/updated from OAuth claims
 
-### Get Current User
-```http
-GET /api/auth/me
-```
+**Session Management:**
+- Sessions stored in PostgreSQL using `connect-pg-simple`
+- HTTP-only cookies for security
+- 7-day session expiration
+- Automatic token refresh
+
+### User Profile Management
+
+User profiles are automatically managed through the OAuth flow. The system automatically creates and updates user profiles based on OAuth claims from Replit.
 
 **Response (200 OK):**
 ```json
@@ -110,26 +93,16 @@ GET /api/auth/me
 }
 ```
 
-### Logout User
-```http
-POST /api/auth/logout
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Logged out successfully"
-}
-```
+### Logout
+Logout is handled through the Replit OAuth flow by destroying the session.
 
 ---
 
 ## Resource Management
 
-### List Academic Resources
+### List Academic Notes
 ```http
-GET /api/resources
+GET /api/notes
 ```
 
 **Query Parameters:**
@@ -179,9 +152,9 @@ GET /api/resources?subject=Computer%20Science&type=pdf&page=1&limit=10
 }
 ```
 
-### Upload Resource
+### Upload Note
 ```http
-POST /api/resources
+POST /api/notes
 ```
 
 **Content-Type:** `multipart/form-data`
@@ -214,9 +187,9 @@ POST /api/resources
 }
 ```
 
-### Get Resource Details
+### Get Note Details
 ```http
-GET /api/resources/:id
+GET /api/notes/:id
 ```
 
 **Response (200 OK):**
@@ -260,16 +233,21 @@ GET /api/resources/:id
 }
 ```
 
-### Download Resource
+### Record Download
 ```http
-GET /api/resources/:id/download
+POST /api/notes/:id/download
 ```
 
-**Response:** File download with appropriate Content-Type headers
+**Response (200 OK):**
+```json
+{
+  "message": "Download recorded"
+}
+```
 
-### Update Resource
+### Delete Note
 ```http
-PUT /api/resources/:id
+DELETE /api/notes/:id
 ```
 
 **Request Body:**
@@ -291,9 +269,11 @@ PUT /api/resources/:id
 }
 ```
 
-### Delete Resource
-```http
-DELETE /api/resources/:id
+**Response (200 OK):**
+```json
+{
+  "message": "Note deleted successfully"
+}
 ```
 
 **Response (200 OK):**
@@ -421,19 +401,19 @@ GET /api/vendors/:id
 
 ## Search Endpoints
 
-### Search Resources
+### Search Notes
 ```http
-GET /api/search/resources
+GET /api/notes?search=query&subject=computer-science&university=example
 ```
 
 **Query Parameters:**
-- `q` (string): Search query
+- `search` (string): Search query (searches title and description)
 - `subject` (string): Subject filter
-- `type` (string): Resource type filter
+- `contentType` (string): Content type filter
 - `university` (string): University filter
-- `minRating` (number): Minimum rating
-- `sortBy` (string): Sort field (date, rating, downloads, title)
-- `sortOrder` (string): Sort order (asc, desc)
+- `limit` (number): Results per page (default: 20)
+- `offset` (number): Results offset (default: 0)
+- `sortBy` (string): Sort by (popular, recent, rating)
 
 **Response (200 OK):**
 ```json
@@ -460,16 +440,14 @@ GET /api/search/resources
 
 ### Search Vendors
 ```http
-GET /api/search/vendors
+GET /api/vendors?search=query&category=food&limit=10
 ```
 
 **Query Parameters:**
-- `q` (string): Search query
-- `category` (string): Category filter
-- `location` (string): Location filter
-- `radius` (number): Search radius in kilometers
-- `lat` (number): Latitude for location-based search
-- `lng` (number): Longitude for location-based search
+- `search` (string): Search query (searches name and description)
+- `category` (string): Category filter (accommodation, food, tutoring, etc.)
+- `limit` (number): Results per page (default: 20)
+- `offset` (number): Results offset (default: 0)
 
 ---
 

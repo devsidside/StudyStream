@@ -153,8 +153,8 @@ The server implements a clean API architecture:
 |---------|---------|
 | **PostgreSQL** | Primary relational database |
 | **Neon** | Serverless PostgreSQL hosting |
-| **Supabase** | Authentication and real-time features |
 | **Drizzle ORM** | Type-safe database ORM |
+| **Supabase** | Additional auth capabilities (optional) |
 | **Replit Auth** | OAuth authentication provider |
 
 ### Development Tools
@@ -493,16 +493,16 @@ StudyConnect/
 
 ### Authentication Flow
 
-The application implements a multi-provider authentication system:
+The application implements **Replit OAuth** authentication:
 
-1. **OAuth Providers**:
-   - Replit OAuth (primary)
-   - Supabase Auth (secondary)
+1. **OAuth Provider**:
+   - Replit OAuth (via OpenID Connect)
+   - Automatic user profile creation/updates
 
 2. **Session Management**:
    - Express sessions with PostgreSQL storage
    - HTTP-only cookies for security
-   - Automatic session refresh
+   - 7-day session expiration with refresh
 
 3. **Role-Based Access**:
    - **Students**: Access to academic resources and marketplace
