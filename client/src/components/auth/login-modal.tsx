@@ -9,9 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
+import { FormTextField, FormCheckboxField } from "@/components/form";
 import { X } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -103,63 +102,29 @@ export default function LoginModal({ open, onOpenChange, onSignupClick }: LoginM
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
+            <FormTextField
               control={form.control}
               name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="john@university.edu"
-                      {...field}
-                      data-testid="input-login-email"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Email Address"
+              type="email"
+              placeholder="john@university.edu"
+              testId="input-login-email"
             />
 
-            <FormField
+            <FormTextField
               control={form.control}
               name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••••••••"
-                      {...field}
-                      data-testid="input-login-password"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Password"
+              type="password"
+              placeholder="••••••••••••••"
+              testId="input-login-password"
             />
 
-            <FormField
+            <FormCheckboxField
               control={form.control}
               name="rememberMe"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      data-testid="checkbox-remember-me"
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel className="text-sm">
-                      Remember me
-                    </FormLabel>
-                  </div>
-                </FormItem>
-              )}
+              label="Remember me"
+              testId="checkbox-remember-me"
             />
 
             <Button
