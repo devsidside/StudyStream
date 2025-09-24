@@ -8,6 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 
+// Define interface for vendors API response
+interface VendorsResponse {
+  vendors: Array<{
+    id: number;
+    name: string;
+    description?: string;
+    category: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+    website?: string;
+    priceRange?: string;
+    averageRating: string;
+    totalRatings: number;
+    isVerified: boolean;
+    isActive: boolean;
+  }>;
+  total: number;
+}
+
 export default function Home() {
   const { user } = useAuth();
   
@@ -23,7 +43,7 @@ export default function Home() {
     queryKey: ['/api/analytics/subjects'],
   });
 
-  const { data: vendorsData } = useQuery({
+  const { data: vendorsData } = useQuery<VendorsResponse>({
     queryKey: ['/api/vendors', { limit: 6 }],
   });
 
@@ -106,14 +126,14 @@ export default function Home() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {subjectStats?.slice(0, 6).map((subject: any) => (
+                  {subjectStats && Array.isArray(subjectStats) ? subjectStats.slice(0, 6).map((subject: any) => (
                     <Link key={subject.subject} href={`/browse?subject=${subject.subject}`}>
                       <div className="flex justify-between items-center p-3 rounded-lg hover:bg-muted transition-colors cursor-pointer" data-testid={`link-subject-${subject.subject}`}>
                         <span className="capitalize">{subject.subject.replace('-', ' ')}</span>
                         <span className="text-sm text-muted-foreground">({subject.count})</span>
                       </div>
                     </Link>
-                  ))}
+                  )) : null}
                   <Link href="/browse">
                     <Button variant="ghost" size="sm" className="w-full" data-testid="button-view-all-subjects">
                       View All Subjects →
@@ -172,9 +192,9 @@ export default function Home() {
                 </div>
                 
                 <div className="grid gap-4">
-                  {trendingNotes?.slice(0, 3).map((note: any) => (
+                  {trendingNotes && Array.isArray(trendingNotes) ? trendingNotes.slice(0, 3).map((note: any) => (
                     <NoteCard key={note.id} note={note} />
-                  ))}
+                  )) : null}
                 </div>
               </div>
 
@@ -195,9 +215,9 @@ export default function Home() {
                 </div>
                 
                 <div className="grid gap-4">
-                  {recentNotes?.slice(0, 3).map((note: any) => (
+                  {recentNotes && Array.isArray(recentNotes) ? recentNotes.slice(0, 3).map((note: any) => (
                     <NoteCard key={note.id} note={note} />
-                  ))}
+                  )) : null}
                 </div>
               </div>
 
@@ -218,9 +238,9 @@ export default function Home() {
                 </div>
                 
                 <div className="grid md:grid-cols-2 gap-4">
-                  {vendorsData?.vendors?.slice(0, 4).map((vendor: any) => (
+                  {vendorsData?.vendors && Array.isArray(vendorsData.vendors) ? vendorsData.vendors.slice(0, 4).map((vendor: any) => (
                     <VendorCard key={vendor.id} vendor={vendor} />
-                  ))}
+                  )) : null}
                 </div>
               </div>
             </div>
