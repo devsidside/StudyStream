@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import QuickActionCard from "@/components/common/QuickActionCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -204,20 +205,14 @@ export default function StudentDashboard() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {quickActions.map((action) => (
-                    <Button
+                    <QuickActionCard
                       key={action.title}
-                      variant="outline"
-                      className="h-24 flex-col space-y-2 p-4"
-                      data-testid={`action-${action.title.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center`}>
-                        <action.icon className="h-6 w-6 text-white" />
-                      </div>
-                      <div className="text-center">
-                        <p className="font-medium text-sm">{action.title}</p>
-                        <p className="text-xs text-muted-foreground">{action.description}</p>
-                      </div>
-                    </Button>
+                      icon={action.icon}
+                      title={action.title}
+                      description={action.description}
+                      color={action.color}
+                      testId={`action-${action.title.toLowerCase().replace(/\s+/g, '-')}`}
+                    />
                   ))}
                 </div>
               </CardContent>
