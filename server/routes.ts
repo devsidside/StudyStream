@@ -4,6 +4,7 @@ import multer from "multer";
 import path from "path";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { sanitizePlainText, validateContentSafety } from "./sanitizer";
 import { insertNoteSchema, insertNoteFileSchema, insertNoteRatingSchema, insertNoteCommentSchema, insertVendorSchema, insertVendorRatingSchema, insertSavedNoteSchema, insertAdvertisementSchema, insertAccommodationSchema, insertAccommodationRoomSchema, insertSavedAccommodationSchema, insertAccommodationVisitSchema, insertAccommodationBookingSchema, insertTutorSchema, insertTutorRatingSchema, insertTutorSessionSchema, insertTutorAvailabilitySlotSchema, insertSavedTutorSchema, type TutorSearchFilters } from "@shared/schema";
 import fs from "fs/promises";
 
@@ -173,13 +174,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const noteId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
-      const ratingData = insertNoteRatingSchema.parse({ ...req.body, noteId, userId });
+      
+      // Sanitize review content if provided
+      const review = req.body.review;
+      if (review && !validateContentSafety(review)) {
+        return res.status(400).json({ message: "Review contains potentially dangerous elements" });
+      }
+      
+      const sanitizedReview = review ? sanitizePlainText(review) : review;
+      const ratingData = insertNoteRatingSchema.parse({ 
+        ...req.body, 
+        review: sanitizedReview,
+        noteId, 
+        userId 
+      });
       
       // Check if user already rated this note
       const existingRating = await storage.getUserNoteRating(noteId, userId);
       
       if (existingRating) {
-        await storage.updateNoteRating(existingRating.id, ratingData.rating, ratingData.review || undefined);
+        await storage.updateNoteRating(existingRating.id, ratingData.rating, sanitizedReview || undefined);
         res.json({ message: "Rating updated successfully" });
       } else {
         const rating = await storage.addNoteRating(ratingData);
@@ -207,7 +221,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const noteId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
-      const commentData = insertNoteCommentSchema.parse({ ...req.body, noteId, userId });
+      
+      // Sanitize content before validation
+      const content = req.body.content;
+      if (content && !validateContentSafety(content)) {
+        return res.status(400).json({ message: "Content contains potentially dangerous elements" });
+      }
+      
+      const sanitizedContent = content ? sanitizePlainText(content) : content;
+      const commentData = insertNoteCommentSchema.parse({ 
+        ...req.body, 
+        content: sanitizedContent,
+        noteId, 
+        userId 
+      });
       
       const comment = await storage.addNoteComment(commentData);
       res.status(201).json(comment);
@@ -350,7 +377,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const vendorId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
-      const ratingData = insertVendorRatingSchema.parse({ ...req.body, vendorId, userId });
+      
+      // Sanitize review content if provided
+      const review = req.body.review;
+      if (review && !validateContentSafety(review)) {
+        return res.status(400).json({ message: "Review contains potentially dangerous elements" });
+      }
+      
+      const sanitizedReview = review ? sanitizePlainText(review) : review;
+      const ratingData = insertVendorRatingSchema.parse({ 
+        ...req.body, 
+        review: sanitizedReview,
+        vendorId, 
+        userId 
+      });
       
       const rating = await storage.addVendorRating(ratingData);
       res.status(201).json(rating);
