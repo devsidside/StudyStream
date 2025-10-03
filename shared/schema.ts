@@ -91,6 +91,8 @@ export const notes = pgTable("notes", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   subject: subjectEnum("subject").notNull(),
+  stream: varchar("stream"),
+  year: varchar("year"),
   courseCode: varchar("course_code"),
   professor: varchar("professor"),
   university: varchar("university").notNull(),
@@ -112,6 +114,8 @@ export const notes = pgTable("notes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("idx_notes_subject").on(table.subject),
+  index("idx_notes_stream").on(table.stream),
+  index("idx_notes_year").on(table.year),
   index("idx_notes_university").on(table.university),
   index("idx_notes_uploader").on(table.uploaderId),
 ]);
@@ -535,12 +539,145 @@ export const advertisements = pgTable("advertisements", {
   expiresAt: timestamp("expires_at"),
 });
 
+// Projects table
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  subject: subjectEnum("subject").notNull(),
+  stream: varchar("stream"),
+  year: varchar("year"),
+  courseCode: varchar("course_code"),
+  university: varchar("university").notNull(),
+  tags: text("tags").array(),
+  uploaderId: varchar("uploader_id").references(() => users.id).notNull(),
+  githubUrl: varchar("github_url"),
+  demoUrl: varchar("demo_url"),
+  technologies: text("technologies").array(),
+  totalViews: integer("total_views").default(0),
+  totalLikes: integer("total_likes").default(0),
+  averageRating: decimal("average_rating", { precision: 3, scale: 2 }).default("0"),
+  totalRatings: integer("total_ratings").default(0),
+  visibility: visibilityEnum("visibility").default("public"),
+  allowComments: boolean("allow_comments").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_projects_subject").on(table.subject),
+  index("idx_projects_stream").on(table.stream),
+  index("idx_projects_year").on(table.year),
+  index("idx_projects_university").on(table.university),
+  index("idx_projects_uploader").on(table.uploaderId),
+]);
+
+// Saved projects
+export const savedProjects = pgTable("saved_projects", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  savedAt: timestamp("saved_at").defaultNow(),
+}, (table) => [
+  index("idx_saved_projects_user").on(table.userId),
+  index("idx_saved_projects_project").on(table.projectId),
+]);
+
+// Events table
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  eventType: varchar("event_type"), // workshop, seminar, hackathon, meetup, etc.
+  subject: subjectEnum("subject"),
+  stream: varchar("stream"),
+  year: varchar("year"),
+  university: varchar("university"),
+  location: text("location"),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  registrationUrl: varchar("registration_url"),
+  imageUrl: varchar("image_url"),
+  organizerId: varchar("organizer_id").references(() => users.id).notNull(),
+  maxAttendees: integer("max_attendees"),
+  currentAttendees: integer("current_attendees").default(0),
+  tags: text("tags").array(),
+  isOnline: boolean("is_online").default(false),
+  meetingLink: varchar("meeting_link"),
+  status: varchar("status").default("upcoming"), // upcoming, ongoing, completed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_events_subject").on(table.subject),
+  index("idx_events_stream").on(table.stream),
+  index("idx_events_year").on(table.year),
+  index("idx_events_university").on(table.university),
+  index("idx_events_organizer").on(table.organizerId),
+  index("idx_events_start_date").on(table.startDate),
+  index("idx_events_status").on(table.status),
+]);
+
+// Event attendees
+export const eventAttendees = pgTable("event_attendees", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => events.id, { onDelete: "cascade" }).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  status: varchar("status").default("registered"), // registered, attended, cancelled
+  registeredAt: timestamp("registered_at").defaultNow(),
+}, (table) => [
+  index("idx_event_attendees_event").on(table.eventId),
+  index("idx_event_attendees_user").on(table.userId),
+]);
+
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  type: varchar("type").notNull(), // note_comment, project_like, event_reminder, vendor_message, etc.
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  linkUrl: varchar("link_url"),
+  relatedId: varchar("related_id"), // ID of related entity
+  relatedType: varchar("related_type"), // note, project, event, vendor, etc.
+  isRead: boolean("is_read").default(false),
+  priority: varchar("priority").default("normal"), // low, normal, high, urgent
+  createdAt: timestamp("created_at").defaultNow(),
+  readAt: timestamp("read_at"),
+}, (table) => [
+  index("idx_notifications_user").on(table.userId),
+  index("idx_notifications_is_read").on(table.isRead),
+  index("idx_notifications_created_at").on(table.createdAt),
+  index("idx_notifications_type").on(table.type),
+]);
+
+// Interactions table (consolidating various interaction types)
+export const interactions = pgTable("interactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  interactionType: varchar("interaction_type").notNull(), // view, like, save, share, download, comment, rating, booking
+  targetType: varchar("target_type").notNull(), // note, project, event, vendor, accommodation, tutor
+  targetId: varchar("target_id").notNull(),
+  metadata: jsonb("metadata"), // flexible field for storing interaction-specific data
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_interactions_user").on(table.userId),
+  index("idx_interactions_type").on(table.interactionType),
+  index("idx_interactions_target").on(table.targetType, table.targetId),
+  index("idx_interactions_created_at").on(table.createdAt),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   notes: many(notes),
   ratings: many(noteRatings),
   comments: many(noteComments),
   savedNotes: many(savedNotes),
+  projects: many(projects),
+  savedProjects: many(savedProjects),
+  events: many(events),
+  eventAttendees: many(eventAttendees),
+  notifications: many(notifications),
+  interactions: many(interactions),
   vendors: many(vendors),
   vendorRatings: many(vendorRatings),
   savedAccommodations: many(savedAccommodations),
@@ -649,6 +786,34 @@ export const vendorRatingsRelations = relations(vendorRatings, ({ one }) => ({
 export const savedNotesRelations = relations(savedNotes, ({ one }) => ({
   user: one(users, { fields: [savedNotes.userId], references: [users.id] }),
   note: one(notes, { fields: [savedNotes.noteId], references: [notes.id] }),
+}));
+
+export const projectsRelations = relations(projects, ({ one, many }) => ({
+  uploader: one(users, { fields: [projects.uploaderId], references: [users.id] }),
+  savedBy: many(savedProjects),
+}));
+
+export const savedProjectsRelations = relations(savedProjects, ({ one }) => ({
+  user: one(users, { fields: [savedProjects.userId], references: [users.id] }),
+  project: one(projects, { fields: [savedProjects.projectId], references: [projects.id] }),
+}));
+
+export const eventsRelations = relations(events, ({ one, many }) => ({
+  organizer: one(users, { fields: [events.organizerId], references: [users.id] }),
+  attendees: many(eventAttendees),
+}));
+
+export const eventAttendeesRelations = relations(eventAttendees, ({ one }) => ({
+  event: one(events, { fields: [eventAttendees.eventId], references: [events.id] }),
+  user: one(users, { fields: [eventAttendees.userId], references: [users.id] }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, { fields: [notifications.userId], references: [users.id] }),
+}));
+
+export const interactionsRelations = relations(interactions, ({ one }) => ({
+  user: one(users, { fields: [interactions.userId], references: [users.id] }),
 }));
 
 // Insert schemas
@@ -766,6 +931,46 @@ export const insertSavedTutorSchema = createInsertSchema(savedTutors).omit({
   savedAt: true,
 });
 
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  uploaderId: true,
+  totalViews: true,
+  totalLikes: true,
+  averageRating: true,
+  totalRatings: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSavedProjectSchema = createInsertSchema(savedProjects).omit({
+  id: true,
+  savedAt: true,
+});
+
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+  organizerId: true,
+  currentAttendees: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEventAttendeeSchema = createInsertSchema(eventAttendees).omit({
+  id: true,
+  registeredAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  readAt: true,
+});
+
+export const insertInteractionSchema = createInsertSchema(interactions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -805,6 +1010,18 @@ export type InsertTutorSession = z.infer<typeof insertTutorSessionSchema>;
 export type TutorSession = typeof tutorSessions.$inferSelect;
 export type InsertSavedTutor = z.infer<typeof insertSavedTutorSchema>;
 export type SavedTutor = typeof savedTutors.$inferSelect;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Project = typeof projects.$inferSelect;
+export type InsertSavedProject = z.infer<typeof insertSavedProjectSchema>;
+export type SavedProject = typeof savedProjects.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Event = typeof events.$inferSelect;
+export type InsertEventAttendee = z.infer<typeof insertEventAttendeeSchema>;
+export type EventAttendee = typeof eventAttendees.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertInteraction = z.infer<typeof insertInteractionSchema>;
+export type Interaction = typeof interactions.$inferSelect;
 
 // Additional types for frontend use
 export type AccommodationWithRooms = Accommodation & {
