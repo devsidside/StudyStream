@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Users, Calendar, MapPin, Search, Plus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Users, Calendar, MapPin, Search, Plus, Map as MapIcon } from "lucide-react";
 import { useState } from "react";
+import MapView from "@/components/MapPin/MapView";
 
 export default function StudyGroups() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   // Mock data for study groups - in a real app, this would come from your API
   const studyGroups = [
@@ -82,75 +85,95 @@ export default function StudyGroups() {
                 data-testid="input-search-groups"
               />
             </div>
+            <div className="flex gap-2">
+              <Button variant={viewMode === 'list' ? 'default' : 'outline'} onClick={() => setViewMode('list')} data-testid="button-list-view">
+                List
+              </Button>
+              <Button variant={viewMode === 'map' ? 'default' : 'outline'} onClick={() => setViewMode('map')} data-testid="button-map-view">
+                <MapIcon className="h-4 w-4 mr-2" />
+                Map
+              </Button>
+            </div>
             <Button className="gap-2" data-testid="button-create-group">
               <Plus className="h-4 w-4" />
               Create Study Group
             </Button>
           </div>
 
-          {/* Study Groups Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredGroups.map((group) => (
-              <Card key={group.id} className="hover:shadow-lg transition-shadow" data-testid={`card-group-${group.id}`}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg" data-testid={`text-group-name-${group.id}`}>
-                        {group.name}
-                      </CardTitle>
-                      <CardDescription data-testid={`text-group-subject-${group.id}`}>
-                        {group.subject}
-                      </CardDescription>
-                    </div>
-                    <Badge variant="secondary" data-testid={`badge-members-${group.id}`}>
-                      {group.members}/{group.maxMembers}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4" data-testid={`text-group-description-${group.id}`}>
-                    {group.description}
+          {/* Study Groups Grid or Map */}
+          {viewMode === 'list' ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredGroups.map((group) => (
+                  <Card key={group.id} className="hover:shadow-lg transition-shadow" data-testid={`card-group-${group.id}`}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg" data-testid={`text-group-name-${group.id}`}>
+                            {group.name}
+                          </CardTitle>
+                          <CardDescription data-testid={`text-group-subject-${group.id}`}>
+                            {group.subject}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="secondary" data-testid={`badge-members-${group.id}`}>
+                          {group.members}/{group.maxMembers}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4" data-testid={`text-group-description-${group.id}`}>
+                        {group.description}
+                      </p>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Users className="h-4 w-4" />
+                          <span data-testid={`text-group-members-${group.id}`}>{group.members} members</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span data-testid={`text-group-meeting-${group.id}`}>
+                            {new Date(group.nextMeeting).toLocaleDateString()} at{" "}
+                            {new Date(group.nextMeeting).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span data-testid={`text-group-location-${group.id}`}>{group.location}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {group.tags.map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs" data-testid={`tag-${tag.toLowerCase()}-${group.id}`}>
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+
+                      <Button className="w-full" data-testid={`button-join-${group.id}`}>
+                        RSVP / Join
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {filteredGroups.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground" data-testid="text-no-groups">
+                    No study groups found. Try adjusting your search or create a new group!
                   </p>
-                  
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Users className="h-4 w-4" />
-                      <span data-testid={`text-group-members-${group.id}`}>{group.members} members</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span data-testid={`text-group-meeting-${group.id}`}>
-                        {new Date(group.nextMeeting).toLocaleDateString()} at{" "}
-                        {new Date(group.nextMeeting).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span data-testid={`text-group-location-${group.id}`}>{group.location}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {group.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs" data-testid={`tag-${tag.toLowerCase()}-${group.id}`}>
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <Button className="w-full" data-testid={`button-join-${group.id}`}>
-                    Join Study Group
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredGroups.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground" data-testid="text-no-groups">
-                No study groups found. Try adjusting your search or create a new group!
-              </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="h-[600px]">
+              <MapView 
+                events={filteredGroups}
+                onEventClick={(event) => console.log('Event clicked:', event)}
+              />
             </div>
           )}
         </div>

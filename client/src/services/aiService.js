@@ -1,4 +1,4 @@
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest } from './api';
 
 const aiService = {
   async summarizeContent(content, maxLength = 150) {

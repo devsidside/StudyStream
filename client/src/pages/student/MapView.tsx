@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Navbar from "@/components/layout/navbar";
+import Footer from "@/components/layout/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,7 @@ import {
   Star,
   Clock
 } from "lucide-react";
+import MapViewComponent from "@/components/MapPin/MapView";
 
 export default function MapView() {
   const [searchRadius, setSearchRadius] = useState("1");
@@ -127,46 +130,14 @@ export default function MapView() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="flex items-center justify-between h-16 px-4">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" data-testid="button-menu">
-              <Menu className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                <BookOpen className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold text-foreground">StudyConnect</span>
-            </div>
-          </div>
-          
-          <div className="flex-1 max-w-md mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search on map..."
-                className="pl-10"
-                data-testid="input-map-search"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" data-testid="button-notifications">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground text-sm font-medium">S</span>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="flex pt-16 h-screen">
-        {/* Map Controls Sidebar */}
-        <aside className="w-64 bg-background border-r border-border p-4 overflow-y-auto">
+      <Navbar />
+      
+      <div className="pt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl font-bold mb-8" data-testid="heading-map-view">Campus Map View</h1>
+          <div className="flex gap-8">
+            {/* Map Controls Sidebar */}
+            <aside className="w-64 bg-background border border-border rounded-lg p-4 overflow-y-auto h-[calc(100vh-200px)]">
           <div className="space-y-6">
             {/* Map Layers */}
             <div>
@@ -228,11 +199,11 @@ export default function MapView() {
                 </RadioGroup>
               </div>
             </div>
-          </div>
-        </aside>
+              </div>
+            </aside>
 
-        {/* Map Area */}
-        <main className="flex-1 relative">
+            {/* Map Area */}
+            <main className="flex-1 relative">
           <div className="h-full bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900 dark:to-blue-900 relative overflow-hidden">
             {/* Map Controls */}
             <div className="absolute top-4 right-4 z-10 flex flex-col space-y-2">
@@ -351,28 +322,18 @@ export default function MapView() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Bottom Controls */}
-          <div className="absolute bottom-0 left-0 right-0 bg-background border-t border-border p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex space-x-4">
-                <Button variant="outline" data-testid="button-list-view">
-                  <List className="h-4 w-4 mr-2" />
-                  List View
-                </Button>
-                <Button variant="outline" data-testid="button-filters">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filters
-                </Button>
               </div>
-              <p className="text-sm text-muted-foreground" data-testid="text-services-count">
-                15 services in this area
-              </p>
-            </div>
+
+              <MapViewComponent 
+                vendors={visibleServices}
+                onVendorClick={(vendor) => setSelectedService(vendor)}
+              />
+            </main>
           </div>
-        </main>
+        </div>
       </div>
+      
+      <Footer />
     </div>
   );
 }

@@ -9,8 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Grid, List } from "lucide-react";
+import { Search, Filter, Grid, List, Bot } from "lucide-react";
 import { useLocation } from "wouter";
+import AIAssistant from "@/components/ChatWidget/AIAssistant";
+import StreamFilter from "@/components/filters/StreamFilter";
+import YearFilter from "@/components/filters/YearFilter";
+import SubjectFilter from "@/components/filters/SubjectFilter";
 
 interface FilterState {
   subjects: string[];
@@ -33,6 +37,10 @@ export default function BrowseNotes() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const [showAI, setShowAI] = useState(false);
+  const [streamFilter, setStreamFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
+  const [subjectFilters, setSubjectFilters] = useState<string[]>([]);
 
   // Parse URL parameters on mount
   useEffect(() => {
@@ -123,7 +131,17 @@ export default function BrowseNotes() {
               <Button type="submit" data-testid="button-search">
                 Search
               </Button>
+              <Button type="button" variant="outline" onClick={() => setShowAI(!showAI)} data-testid="button-ai-assistant">
+                <Bot className="w-4 h-4" />
+              </Button>
             </form>
+          </div>
+
+          {/* Additional Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <StreamFilter value={streamFilter} onChange={setStreamFilter} />
+            <YearFilter value={yearFilter} onChange={setYearFilter} />
+            <SubjectFilter value={subjectFilters} onChange={setSubjectFilters} />
           </div>
 
           {/* Active Filters Display */}
@@ -274,6 +292,13 @@ export default function BrowseNotes() {
       </div>
 
       <Footer />
+      
+      {showAI && (
+        <AIAssistant
+          context="notes"
+          onClose={() => setShowAI(false)}
+        />
+      )}
     </div>
   );
 }
