@@ -5,7 +5,7 @@ import path from "path";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { sanitizePlainText, validateContentSafety } from "./sanitizer";
-import { insertNoteSchema, insertNoteFileSchema, insertNoteRatingSchema, insertNoteCommentSchema, insertVendorSchema, insertVendorRatingSchema, insertSavedNoteSchema, insertAdvertisementSchema, insertAccommodationSchema, insertAccommodationRoomSchema, insertSavedAccommodationSchema, insertAccommodationVisitSchema, insertAccommodationBookingSchema, insertTutorSchema, insertTutorRatingSchema, insertTutorSessionSchema, insertTutorAvailabilitySlotSchema, insertSavedTutorSchema, type TutorSearchFilters } from "@shared/schema";
+import { insertNoteSchema, insertNoteFileSchema, insertNoteRatingSchema, insertNoteCommentSchema, insertVendorSchema, insertVendorRatingSchema, insertSavedNoteSchema, insertAdvertisementSchema, insertAccommodationSchema, insertAccommodationRoomSchema, insertSavedAccommodationSchema, insertAccommodationVisitSchema, insertAccommodationBookingSchema, insertTutorSchema, insertTutorRatingSchema, insertTutorSessionSchema, insertTutorAvailabilitySlotSchema, insertSavedTutorSchema, insertProjectSchema, insertEventSchema, insertNotificationSchema, insertInteractionSchema, type TutorSearchFilters } from "@shared/schema";
 import fs from "fs/promises";
 
 // Configure multer for file uploads
@@ -1015,6 +1015,586 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching subject stats:", error);
       res.status(500).json({ message: "Failed to fetch subject stats" });
+    }
+  });
+
+  // Projects routes
+  app.get('/api/projects', async (req, res) => {
+    try {
+      const filters = {
+        subject: req.query.subject as string,
+        stream: req.query.stream as string,
+        year: req.query.year as string,
+        university: req.query.university as string,
+        searchTerm: req.query.search as string,
+        limit: parseInt(req.query.limit as string) || 20,
+        offset: parseInt(req.query.offset as string) || 0,
+        sortBy: req.query.sortBy as 'popular' | 'recent' | 'rating' || 'recent',
+      };
+      
+      const result = await storage.getProjects(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
+  app.get('/api/projects/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const project = await storage.getProjectById(id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+
+      await storage.updateProjectViews(id);
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      res.status(500).json({ message: "Failed to fetch project" });
+    }
+  });
+
+  app.post('/api/projects', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const projectData = insertProjectSchema.parse(req.body);
+      
+      const project = await storage.createProject(projectData, userId);
+      res.status(201).json(project);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      res.status(500).json({ message: "Failed to create project" });
+    }
+  });
+
+  app.put('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const projectData = insertProjectSchema.partial().parse(req.body);
+      
+      const success = await storage.updateProject(id, projectData, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Project not found or unauthorized" });
+      }
+      
+      res.json({ message: "Project updated successfully" });
+    } catch (error) {
+      console.error("Error updating project:", error);
+      res.status(500).json({ message: "Failed to update project" });
+    }
+  });
+
+  app.delete('/api/projects/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const success = await storage.deleteProject(id, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Project not found or unauthorized" });
+      }
+      
+      res.json({ message: "Project deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
+  app.post('/api/projects/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.updateProjectLikes(id);
+      res.json({ message: "Project liked successfully" });
+    } catch (error) {
+      console.error("Error liking project:", error);
+      res.status(500).json({ message: "Failed to like project" });
+    }
+  });
+
+  // Saved projects routes
+  app.get('/api/saved-projects', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const savedProjects = await storage.getUserSavedProjects(userId);
+      res.json(savedProjects);
+    } catch (error) {
+      console.error("Error fetching saved projects:", error);
+      res.status(500).json({ message: "Failed to fetch saved projects" });
+    }
+  });
+
+  app.post('/api/projects/:id/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const savedProject = await storage.saveProject({ projectId, userId });
+      res.status(201).json(savedProject);
+    } catch (error) {
+      console.error("Error saving project:", error);
+      res.status(500).json({ message: "Failed to save project" });
+    }
+  });
+
+  app.delete('/api/projects/:id/save', isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.unsaveProject(projectId, userId);
+      res.json({ message: "Project unsaved successfully" });
+    } catch (error) {
+      console.error("Error unsaving project:", error);
+      res.status(500).json({ message: "Failed to unsave project" });
+    }
+  });
+
+  // Events routes
+  app.get('/api/events', async (req, res) => {
+    try {
+      const filters = {
+        subject: req.query.subject as string,
+        stream: req.query.stream as string,
+        year: req.query.year as string,
+        university: req.query.university as string,
+        eventType: req.query.eventType as string,
+        status: req.query.status as string,
+        searchTerm: req.query.search as string,
+        startDate: req.query.startDate ? new Date(req.query.startDate as string) : undefined,
+        endDate: req.query.endDate ? new Date(req.query.endDate as string) : undefined,
+        limit: parseInt(req.query.limit as string) || 20,
+        offset: parseInt(req.query.offset as string) || 0,
+        sortBy: req.query.sortBy as string || 'startDate',
+      };
+      
+      const result = await storage.getEvents(filters);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  app.get('/api/events/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const event = await storage.getEventById(id);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  app.post('/api/events', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const eventData = insertEventSchema.parse(req.body);
+      
+      const event = await storage.createEvent(eventData, userId);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ message: "Failed to create event" });
+    }
+  });
+
+  app.put('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const eventData = insertEventSchema.partial().parse(req.body);
+      
+      const success = await storage.updateEvent(id, eventData, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Event not found or unauthorized" });
+      }
+      
+      res.json({ message: "Event updated successfully" });
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+
+  app.delete('/api/events/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const success = await storage.deleteEvent(id, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Event not found or unauthorized" });
+      }
+      
+      res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+
+  // Event attendees routes
+  app.post('/api/events/:id/register', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const registration = await storage.registerForEvent(eventId, userId);
+      res.status(201).json(registration);
+    } catch (error) {
+      console.error("Error registering for event:", error);
+      res.status(500).json({ message: "Failed to register for event" });
+    }
+  });
+
+  app.delete('/api/events/:id/register', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      await storage.unregisterFromEvent(eventId, userId);
+      res.json({ message: "Unregistered from event successfully" });
+    } catch (error) {
+      console.error("Error unregistering from event:", error);
+      res.status(500).json({ message: "Failed to unregister from event" });
+    }
+  });
+
+  app.get('/api/events/:id/attendees', async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const attendees = await storage.getEventAttendees(eventId);
+      res.json(attendees);
+    } catch (error) {
+      console.error("Error fetching event attendees:", error);
+      res.status(500).json({ message: "Failed to fetch event attendees" });
+    }
+  });
+
+  // Notifications routes
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const filters = {
+        isRead: req.query.isRead === 'true' ? true : req.query.isRead === 'false' ? false : undefined,
+        type: req.query.type as string,
+        limit: parseInt(req.query.limit as string) || 50,
+        offset: parseInt(req.query.offset as string) || 0,
+      };
+      
+      const notifications = await storage.getNotifications(userId, filters);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notificationData = insertNotificationSchema.parse({ ...req.body, userId });
+      
+      const notification = await storage.createNotification(notificationData);
+      res.status(201).json(notification);
+    } catch (error) {
+      console.error("Error creating notification:", error);
+      res.status(500).json({ message: "Failed to create notification" });
+    }
+  });
+
+  app.put('/api/notifications/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const updates = req.body;
+      
+      const success = await storage.updateNotification(id, updates, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Notification not found or unauthorized" });
+      }
+      
+      res.json({ message: "Notification updated successfully" });
+    } catch (error) {
+      console.error("Error updating notification:", error);
+      res.status(500).json({ message: "Failed to update notification" });
+    }
+  });
+
+  app.put('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const success = await storage.markNotificationAsRead(id, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Notification not found or unauthorized" });
+      }
+      
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.put('/api/notifications/read-all', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ message: "All notifications marked as read" });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete('/api/notifications/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      const success = await storage.deleteNotification(id, userId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Notification not found or unauthorized" });
+      }
+      
+      res.json({ message: "Notification deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      res.status(500).json({ message: "Failed to delete notification" });
+    }
+  });
+
+  app.get('/api/notifications/unread-count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread notification count:", error);
+      res.status(500).json({ message: "Failed to fetch unread notification count" });
+    }
+  });
+
+  // Interactions routes
+  app.post('/api/interactions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const interactionData = insertInteractionSchema.parse({ ...req.body, userId });
+      
+      const interaction = await storage.createInteraction(interactionData);
+      res.status(201).json(interaction);
+    } catch (error) {
+      console.error("Error creating interaction:", error);
+      res.status(500).json({ message: "Failed to create interaction" });
+    }
+  });
+
+  app.get('/api/interactions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const filters = {
+        interactionType: req.query.type as string,
+        targetType: req.query.targetType as string,
+        targetId: req.query.targetId as string,
+        limit: parseInt(req.query.limit as string) || 100,
+        offset: parseInt(req.query.offset as string) || 0,
+      };
+      
+      const interactions = await storage.getInteractions(userId, filters);
+      res.json(interactions);
+    } catch (error) {
+      console.error("Error fetching interactions:", error);
+      res.status(500).json({ message: "Failed to fetch interactions" });
+    }
+  });
+
+  // Search endpoint with Full-Text Search
+  app.get('/api/search', async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      const type = req.query.type as string; // notes, projects, events, vendors, all
+      const filters = {
+        subject: req.query.subject as string,
+        stream: req.query.stream as string,
+        year: req.query.year as string,
+        university: req.query.university as string,
+        limit: parseInt(req.query.limit as string) || 20,
+        offset: parseInt(req.query.offset as string) || 0,
+      };
+      
+      if (!query) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+      
+      const results = await storage.searchContent(query, type, filters);
+      res.json(results);
+    } catch (error) {
+      console.error("Error performing search:", error);
+      res.status(500).json({ message: "Failed to perform search" });
+    }
+  });
+
+  // AI endpoints with rate limiting
+  const aiRateLimiter = {
+    requests: new Map<string, { count: number; resetTime: number }>(),
+    checkLimit(userId: string, maxRequests: number = 10, windowMs: number = 60000): boolean {
+      const now = Date.now();
+      const userRequests = this.requests.get(userId);
+      
+      if (!userRequests || userRequests.resetTime < now) {
+        this.requests.set(userId, { count: 1, resetTime: now + windowMs });
+        return true;
+      }
+      
+      if (userRequests.count >= maxRequests) {
+        return false;
+      }
+      
+      userRequests.count++;
+      return true;
+    }
+  };
+
+  app.post('/api/ai/summarize', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      if (!aiRateLimiter.checkLimit(userId, 10)) {
+        return res.status(429).json({ message: "Rate limit exceeded. Please try again later." });
+      }
+      
+      const { content, maxLength } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+      
+      const summary = await storage.summarizeContent(content, maxLength || 150);
+      res.json({ summary });
+    } catch (error) {
+      console.error("Error summarizing content:", error);
+      res.status(500).json({ message: "Failed to summarize content" });
+    }
+  });
+
+  app.post('/api/ai/quiz', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      if (!aiRateLimiter.checkLimit(userId, 5)) {
+        return res.status(429).json({ message: "Rate limit exceeded. Please try again later." });
+      }
+      
+      const { content, numQuestions } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+      
+      const quiz = await storage.generateQuiz(content, numQuestions || 5);
+      res.json({ quiz });
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+      res.status(500).json({ message: "Failed to generate quiz" });
+    }
+  });
+
+  app.post('/api/ai/code-assist', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      if (!aiRateLimiter.checkLimit(userId, 15)) {
+        return res.status(429).json({ message: "Rate limit exceeded. Please try again later." });
+      }
+      
+      const { code, language, task } = req.body;
+      
+      if (!code || !task) {
+        return res.status(400).json({ message: "Code and task are required" });
+      }
+      
+      const assistance = await storage.getCodeAssistance(code, language || 'javascript', task);
+      res.json({ assistance });
+    } catch (error) {
+      console.error("Error providing code assistance:", error);
+      res.status(500).json({ message: "Failed to provide code assistance" });
+    }
+  });
+
+  // Vendor analytics endpoint
+  app.get('/api/vendor/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'vendor') {
+        return res.status(403).json({ message: "Vendor access required" });
+      }
+      
+      const analytics = await storage.getVendorAnalytics(userId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching vendor analytics:", error);
+      res.status(500).json({ message: "Failed to fetch vendor analytics" });
+    }
+  });
+
+  // Personalization endpoint
+  app.get('/api/personalization', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const preferences = await storage.getUserPreferences(userId);
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error fetching personalization preferences:", error);
+      res.status(500).json({ message: "Failed to fetch personalization preferences" });
+    }
+  });
+
+  app.put('/api/personalization', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const preferences = req.body;
+      
+      await storage.updateUserPreferences(userId, preferences);
+      res.json({ message: "Preferences updated successfully" });
+    } catch (error) {
+      console.error("Error updating personalization preferences:", error);
+      res.status(500).json({ message: "Failed to update personalization preferences" });
+    }
+  });
+
+  app.get('/api/personalization/recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const type = req.query.type as string; // notes, projects, events
+      const limit = parseInt(req.query.limit as string) || 10;
+      
+      const recommendations = await storage.getPersonalizedRecommendations(userId, type, limit);
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      res.status(500).json({ message: "Failed to fetch recommendations" });
     }
   });
 
