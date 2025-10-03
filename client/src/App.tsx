@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ErrorProvider, useErrorReporting } from "@/context/ErrorContext";
+import { StudentProvider } from "@/context/StudentContext";
+import { VendorProvider } from "@/context/VendorContext";
+import { AdminProvider } from "@/context/AdminContext";
 import { ErrorBoundary } from "@/components/error-boundaries";
 import NotFound from "@/pages/NotFound";
 import Landing from "@/pages/landing";
@@ -99,21 +102,27 @@ function AppWithErrorHandling() {
     >
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ErrorBoundary 
-            level="page"
-            onError={(error, errorInfo) => {
-              reportError(error, {
-                type: 'error',
-                source: 'client',
-                details: { componentStack: errorInfo.componentStack }
-              });
-            }}
-          >
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </ErrorBoundary>
+          <StudentProvider>
+            <VendorProvider>
+              <AdminProvider>
+                <ErrorBoundary 
+                  level="page"
+                  onError={(error, errorInfo) => {
+                    reportError(error, {
+                      type: 'error',
+                      source: 'client',
+                      details: { componentStack: errorInfo.componentStack }
+                    });
+                  }}
+                >
+                  <TooltipProvider>
+                    <Toaster />
+                    <Router />
+                  </TooltipProvider>
+                </ErrorBoundary>
+              </AdminProvider>
+            </VendorProvider>
+          </StudentProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
