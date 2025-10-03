@@ -477,8 +477,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(approvalsChannel)
-      supabase.removeChannel(flagsChannel)
+      if (supabase) {
+        supabase.removeChannel(approvalsChannel)
+        supabase.removeChannel(flagsChannel)
+      }
     }
   }, [user?.id, isAdmin])
 

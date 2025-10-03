@@ -328,7 +328,9 @@ export function StudentProvider({ children }: { children: ReactNode }) {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(notesChannel)
+      if (supabase) {
+        supabase.removeChannel(notesChannel)
+      }
     }
   }, [user?.id, isStudent])
 

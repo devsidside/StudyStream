@@ -470,8 +470,10 @@ export function VendorProvider({ children }: { children: ReactNode }) {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(servicesChannel)
-      supabase.removeChannel(bookingsChannel)
+      if (supabase) {
+        supabase.removeChannel(servicesChannel)
+        supabase.removeChannel(bookingsChannel)
+      }
     }
   }, [user?.id, isVendor])
 
