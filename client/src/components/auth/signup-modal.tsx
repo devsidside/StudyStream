@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { X, Eye, EyeOff, Lightbulb, Search } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/context/AuthContext";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),

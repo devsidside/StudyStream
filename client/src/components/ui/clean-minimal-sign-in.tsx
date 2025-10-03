@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useState } from "react";
 import { LogIn, Lock, Mail } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/context/AuthContext";
 
 const SignIn2 = () => {
   const [email, setEmail] = useState("");

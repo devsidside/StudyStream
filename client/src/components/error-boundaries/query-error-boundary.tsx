@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useEffect, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertCircle } from 'lucide-react';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/services/api';
 
 interface QueryErrorBoundaryProps {
   children: ReactNode;

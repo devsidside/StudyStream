@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/context/AuthContext";
 import DualAuthModal from "@/components/auth/dual-auth-modal";
 import { Logo } from "@/components/navbar/Logo";
 import { MobileMenu } from "@/components/navbar/MobileMenu";

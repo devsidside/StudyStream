@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useAuth } from '@/contexts/auth-context'
-import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/context/AuthContext'
+import { supabase } from '@/services/supabase'
 import OAuthRoleSelection from '@/components/auth/oauth-role-selection'
 
 export default function AuthCallback() {

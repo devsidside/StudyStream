@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Users, Building, Home, Filter, Star, Map } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import type { 
   AccommodationSearchFilters, 
   AccommodationType, 

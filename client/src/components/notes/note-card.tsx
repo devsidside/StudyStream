@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/common/rating-stars";
 import { Download, Eye, Heart, MessageCircle, User, Calendar, BookOpen } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { formatDistanceToNow } from "date-fns";
 
 interface Note {

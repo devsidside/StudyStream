@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Building2, User, MapPin, BookOpen, Calendar, Briefcase } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/context/AuthContext";
 
 // Student profile schema
 const studentProfileSchema = z.object({

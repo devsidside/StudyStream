@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X, GraduationCap, Building2, Mail, Lock, User, MapPin, BookOpen, Calendar, Briefcase } from "lucide-react";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/context/AuthContext";
 
 // Student login schema
 const studentLoginSchema = z.object({

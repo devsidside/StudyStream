@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { realtimeManager, type RealtimeSubscriptionOptions } from '@/lib/realtime'
+import { realtimeManager, type RealtimeSubscriptionOptions } from '@/services/realtime'
 
 // Hook for subscribing to realtime changes
 export const useRealtime = (options: RealtimeSubscriptionOptions) => {

@@ -13,7 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, Filter, X, CalendarIcon, Star, Download, Eye, Clock } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 export interface SearchFilters {
   searchTerm: string;

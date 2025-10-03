@@ -3,7 +3,7 @@ import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { X, Upload, FileText, Image, Archive, CheckCircle, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 interface FileWithPreview extends File {
   preview?: string;

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import RatingStars from "@/components/common/rating-stars";
 import { MapPin, Phone, Mail, ExternalLink, Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 
 interface Vendor {
   id: number;

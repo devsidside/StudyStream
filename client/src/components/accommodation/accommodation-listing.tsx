@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { MapPin, Star, Phone, Heart, Camera, Calendar, MessageCircle, Map, Filter, Grid, List } from "lucide-react";
 import RatingStars from "@/components/common/rating-stars";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import type { 
   AccommodationSearchFilters, 
   AccommodationSearchResult, 
