@@ -1,0 +1,89 @@
+┌───────────────────────────────┐
+│         Frontend (React)      │
+│-------------------------------│
+│ Pages & Components:           │
+│ • Auth (Login/Register)       │
+│ • Student Dashboard           │
+│ • Vendor Dashboard            │
+│ • Admin Dashboard             │
+│ • Notes, Projects, Events     │
+│ • Map Module (Nearby Vendors/ │
+│   Events/Study Groups)        │
+│ • AI Study Assistant Widget   │
+│                               │
+│ State Management:             │
+│ • AuthContext / StudentContext│
+│ • VendorContext / AdminContext│
+│                               │
+│ UI Libraries: Tailwind, 21st  │
+│ Dev Shade, Lucid/GitHub icons │
+│                               │
+│ Animations: Framer Motion     │
+└───────────────▲───────────────┘
+                │
+                │ API Calls / Realtime
+                ▼
+┌───────────────────────────────┐
+│       Backend (Node.js)       │
+│-------------------------------│
+│ Supabase Integration:          │
+│ • Auth & Role Management       │
+│ • Postgres DB + Storage        │
+│ • RLS (Row-Level Security)     │
+│                               │
+│ APIs:                         │
+│ • Notes, Projects, Events CRUD│
+│ • Vendor Management & Analytics│
+│ • AI Summarization/Quiz/Code   │
+│ • Notifications                │
+│ • Personalized Filtering       │
+│                               │
+│ Stream & Year-Based Personalization│
+│ • Filters content based on:   │
+│   Stream, Program, Year, Subjects │
+└───────────────▲───────────────┘
+                │
+                │ Database Queries & Indexing
+                ▼
+┌───────────────────────────────┐
+│    Database Layer (Supabase)  │
+│-------------------------------│
+│ Tables:                       │
+│ • students                    │
+│ • vendors                     │
+│ • admins                      │
+│ • notes (stream, year, subject) │
+│ • projects (stream, year, subject) │
+│ • events (stream, year, location) │
+│ • interactions (reviews, bookings) │
+│ • notifications               │
+│                               │
+│ Row-Level Security (RLS)      │
+│ Ensures proper access         │
+└───────────────▲───────────────┘
+                │
+                │ Search Queries
+                ▼
+┌───────────────────────────────┐
+│    Search / Index Layer        │
+│-------------------------------│
+│ Elasticsearch / Supabase FTS  │
+│ • Fast filtered search         │
+│ • Notes, Projects, Vendors, Events│
+│ • Supports Stream & Year Filters │
+└───────────────▲───────────────┘
+                │
+                │ External Services
+                ▼
+┌───────────────────────────────┐
+│      AI & Third-Party APIs    │
+│-------------------------------│
+│ • OpenAI / LLM API             │
+│   - Summarize notes            │
+│   - Generate quizzes/flashcards│
+│   - Code debugging assistance  │
+│ • Google Maps / Mapbox API     │
+│   - Map visualization of vendors, events, study spots │
+│ • Email / Notification API     │
+│   - Exam reminders, deadlines, vendor alerts          │
+└───────────────────────────────┘
