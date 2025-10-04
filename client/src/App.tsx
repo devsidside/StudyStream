@@ -9,6 +9,7 @@ import { StudentProvider } from "@/context/StudentContext";
 import { VendorProvider } from "@/context/VendorContext";
 import { AdminProvider } from "@/context/AdminContext";
 import { ErrorBoundary } from "@/components/error-boundaries";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import NotFound from "@/pages/NotFound";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -34,6 +35,12 @@ import HowItWorks from "@/pages/how-it-works";
 import BrowseServices from "@/pages/admin/Analytics";
 import Accommodations from "@/pages/vendor/Events";
 import BookTutors from "@/pages/book-tutors";
+import StudentProfile from "@/pages/student/Profile";
+import Notifications from "@/pages/student/Notifications";
+import VendorProfile from "@/pages/vendor/Profile";
+import VendorAnalytics from "@/pages/vendor/BusinessAnalytics";
+import UserManagement from "@/pages/admin/UserManagement";
+import AdminSettings from "@/pages/admin/Settings";
 
 function Router() {
   const { user, loading } = useAuth();
@@ -42,6 +49,7 @@ function Router() {
     <Switch>
       {loading || !user ? (
         <>
+          {/* Public routes */}
           <Route path="/" component={Landing} />
           <Route path="/how-it-works" component={HowItWorks} />
           <Route path="/browse-services" component={BrowseServices} />
@@ -56,26 +64,149 @@ function Router() {
         </>
       ) : (
         <>
+          {/* Authenticated home */}
           <Route path="/" component={Home} />
           <Route path="/how-it-works" component={HowItWorks} />
-          <Route path="/notes" component={NotesHub} />
-          <Route path="/upload" component={UploadNotes} />
-          <Route path="/browse" component={BrowseNotes} />
-          <Route path="/notes/:id" component={NoteDetail} />
+          
+          {/* Student routes */}
+          <Route path="/dashboard">
+            {() => (
+              <ProtectedRoute requiredRole="student">
+                <StudentDashboard />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/student/profile">
+            {() => (
+              <ProtectedRoute requiredRole="student">
+                <StudentProfile />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/student/notifications">
+            {() => (
+              <ProtectedRoute requiredRole="student">
+                <Notifications />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/browse">
+            {() => (
+              <ProtectedRoute requiredRole={["student", "admin"]}>
+                <BrowseNotes />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/upload">
+            {() => (
+              <ProtectedRoute requiredRole="student">
+                <UploadNotes />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/notes/:id">
+            {() => (
+              <ProtectedRoute requiredRole={["student", "admin"]}>
+                <NoteDetail />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/study-groups">
+            {() => (
+              <ProtectedRoute requiredRole={["student", "admin"]}>
+                <StudyGroups />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/map">
+            {() => (
+              <ProtectedRoute requiredRole="student">
+                <MapView />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/discovery">
+            {() => (
+              <ProtectedRoute requiredRole={["student", "admin"]}>
+                <Discovery />
+              </ProtectedRoute>
+            )}
+          </Route>
+          
+          {/* Vendor routes */}
+          <Route path="/vendors/dashboard">
+            {() => (
+              <ProtectedRoute requiredRole="vendor">
+                <VendorDashboard />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/vendors/profile">
+            {() => (
+              <ProtectedRoute requiredRole="vendor">
+                <VendorProfile />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/vendors/analytics">
+            {() => (
+              <ProtectedRoute requiredRole="vendor">
+                <VendorAnalytics />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/vendors/list-service">
+            {() => (
+              <ProtectedRoute requiredRole="vendor">
+                <ListService />
+              </ProtectedRoute>
+            )}
+          </Route>
+          
+          {/* Admin routes */}
+          <Route path="/admin">
+            {() => (
+              <ProtectedRoute requiredRole="admin">
+                <Admin />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/admin/users">
+            {() => (
+              <ProtectedRoute requiredRole="admin">
+                <UserManagement />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/admin/settings">
+            {() => (
+              <ProtectedRoute requiredRole="admin">
+                <AdminSettings />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/notes">
+            {() => (
+              <ProtectedRoute requiredRole="admin">
+                <NotesHub />
+              </ProtectedRoute>
+            )}
+          </Route>
+          <Route path="/campus-resources">
+            {() => (
+              <ProtectedRoute requiredRole="admin">
+                <CampusResources />
+              </ProtectedRoute>
+            )}
+          </Route>
+          
+          {/* Shared authenticated routes */}
           <Route path="/browse-services" component={BrowseServices} />
           <Route path="/accommodations" component={Accommodations} />
           <Route path="/vendors" component={Vendors} />
-          <Route path="/admin" component={Admin} />
-          <Route path="/study-groups" component={StudyGroups} />
-          <Route path="/campus-resources" component={CampusResources} />
-          <Route path="/vendors/list-service" component={ListService} />
-          <Route path="/vendors/dashboard" component={VendorDashboard} />
           <Route path="/vendors/pricing" component={PricingPlans} />
           <Route path="/vendors/success-stories" component={SuccessStories} />
           <Route path="/book-tutors" component={BookTutors} />
-          <Route path="/dashboard" component={StudentDashboard} />
-          <Route path="/discovery" component={Discovery} />
-          <Route path="/map" component={MapView} />
           <Route path="/auth-demo" component={AuthDemo} />
         </>
       )}

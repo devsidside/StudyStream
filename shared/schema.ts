@@ -37,7 +37,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").default("student"), // student, vendor, admin
+  role: varchar("role", { length: 20 }).notNull().default("student"),
   // Student fields
   university: varchar("university"),
   course: varchar("course"),
@@ -1090,6 +1090,7 @@ export type TutorSearchResult = {
 };
 
 // Enum value types for easy use in components
+export type UserRole = "student" | "vendor" | "admin";
 export type AccommodationType = typeof accommodationTypeEnum.enumValues[number];
 export type RoomType = typeof roomTypeEnum.enumValues[number];
 export type GenderPreference = typeof genderPreferenceEnum.enumValues[number];
