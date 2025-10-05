@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # StudyConnect - Student Resource Platform
 
 <div align="center">
